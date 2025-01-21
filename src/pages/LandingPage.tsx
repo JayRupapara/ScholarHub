@@ -11,7 +11,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto pt-16 pb-12 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
             Find Your Perfect Scholarship Today!
-            t
+            
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-indigo-100">
             Discover opportunities that match your unique profile and aspirations
