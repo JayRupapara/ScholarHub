@@ -1,17 +1,26 @@
 'use client';
 
-import { useUser } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isLoaded, isSignedIn } = useUser();
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoaded, userId } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-  if (!isLoaded) {
-    return null;
-  }
+  useEffect(() => {
+    if (!isLoaded) return;
 
-  if (!isSignedIn) {
-    redirect('/sign-in');
+    if (!userId) {
+      router.push("/sign-in");
+    } else {
+      setLoading(false);
+    }
+  }, [isLoaded, userId, router]);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return <>{children}</>;
