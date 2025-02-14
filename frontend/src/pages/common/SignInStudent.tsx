@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User } from 'lucide-react';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 const SignInStudent = () => {
   const navigate = useNavigate();
@@ -9,16 +11,22 @@ const SignInStudent = () => {
     password: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userType', 'student');
-    localStorage.setItem('userEmail', formData.email);
-    navigate('/student/dashboard');
+    const response = await axios.post("http://localhost:5000/api/users/login", formData);
+    if (response.data.msg === "Login success") {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userType', 'student');
+      localStorage.setItem('userEmail', formData.email);
+      navigate("/student/dashboard");
+    } else {
+      toast.error(response.data.msg);
+    }
   };
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center py-8">
+      <ToastContainer />
       <div className="max-w-md w-full px-6">
         <div className="text-center mb-8">
           <User className="w-12 h-12 mx-auto text-primary mb-4" />
@@ -41,7 +49,7 @@ const SignInStudent = () => {
                     placeholder="Enter your email"
                     className="input input-bordered flex-1"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                   />
                 </div>
@@ -57,7 +65,7 @@ const SignInStudent = () => {
                     placeholder="Enter your password"
                     className="input input-bordered flex-1"
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
                   />
                 </div>

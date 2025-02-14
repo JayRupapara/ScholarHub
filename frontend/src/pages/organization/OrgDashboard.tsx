@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Award, DollarSign, Clock, TrendingUp, ChevronRight } from 'lucide-react';
+import { Users, Award, } from 'lucide-react';
 
 const OrgDashboard = () => {
   // Sample data
@@ -18,20 +18,6 @@ const OrgDashboard = () => {
       icon: Award,
       color: "secondary"
     },
-    {
-      title: "Total Awarded",
-      value: "$284K",
-      change: "+$24K",
-      icon: DollarSign,
-      color: "accent"
-    },
-    {
-      title: "Pending Reviews",
-      value: "45",
-      change: "-5",
-      icon: Clock,
-      color: "warning"
-    }
   ];
 
   const recentApplications = [
@@ -55,30 +41,6 @@ const OrgDashboard = () => {
       scholarship: "Future Leaders Fund",
       date: "2024-02-12",
       status: "rejected"
-    }
-  ];
-
-  const popularScholarships = [
-    {
-      id: 1,
-      title: "STEM Excellence Scholarship",
-      applications: 45,
-      trend: "+12%",
-      amount: 10000
-    },
-    {
-      id: 2,
-      title: "Creative Arts Grant",
-      applications: 28,
-      trend: "+8%",
-      amount: 7500
-    },
-    {
-      id: 3,
-      title: "Future Leaders Fund",
-      applications: 36,
-      trend: "+15%",
-      amount: 15000
     }
   ];
 
@@ -121,11 +83,10 @@ const OrgDashboard = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm">{new Date(application.date).toLocaleDateString()}</p>
-                    <span className={`badge badge-sm ${
-                      application.status === 'approved' ? 'badge-success' :
+                    <span className={`badge badge-sm ${application.status === 'approved' ? 'badge-success' :
                       application.status === 'rejected' ? 'badge-error' :
-                      'badge-warning'
-                    }`}>
+                        'badge-warning'
+                      }`}>
                       {application.status}
                     </span>
                   </div>
@@ -135,32 +96,7 @@ const OrgDashboard = () => {
           </div>
         </div>
 
-        {/* Popular Scholarships */}
-        <div className="bg-base-100 rounded-xl shadow-sm">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Popular Scholarships</h2>
-              <button className="btn btn-ghost btn-sm">View All</button>
-            </div>
-            <div className="space-y-4">
-              {popularScholarships.map((scholarship) => (
-                <div key={scholarship.id} className="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-                  <div>
-                    <p className="font-medium">{scholarship.title}</p>
-                    <p className="text-sm text-gray-500">${scholarship.amount.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center text-success">
-                      <TrendingUp className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{scholarship.trend}</span>
-                    </div>
-                    <p className="text-sm text-gray-500">{scholarship.applications} applications</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   );

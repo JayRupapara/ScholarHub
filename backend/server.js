@@ -9,13 +9,17 @@ import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 app.use(express.json());
 
 import cors from "cors";
-app.use(cors());
 import { connectDB } from "./connection/connection.js";
 
 connectDB();
 
 app.use(cookieParser());
-
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true
+  })
+);
 app.use("/api/users", userRoutes);
 app.use("/api/organization", organizationRoutes);
 app.use("/api/scholarship", scholarshipRoutes);

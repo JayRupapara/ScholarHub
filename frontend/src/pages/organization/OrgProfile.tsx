@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Building2, Mail, Phone, Globe, MapPin, Edit, Camera } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Building2, Mail, Phone, Camera } from 'lucide-react';
+import axios from 'axios';
 
 interface OrganizationProfile {
+  contactNumber: string;
   name: string;
   email: string;
-  phone: string;
   website: string;
   address: string;
   description: string;
@@ -17,17 +18,30 @@ interface OrganizationProfile {
 const OrgProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState<OrganizationProfile>({
-    name: "Global Education Foundation",
-    email: "contact@globaledu.org",
-    phone: "+1 (555) 123-4567",
-    website: "www.globaledu.org",
-    address: "123 Education Street, Academic City, ST 12345",
-    description: "A leading non-profit organization dedicated to making education accessible to students worldwide through scholarships and grants.",
-    foundedYear: 1995,
-    type: "Non-Profit Organization",
-    totalScholarships: 150,
-    totalAwarded: 2500000
+    name: "",
+    email: "",
+    contactNumber: "",
+    website: "",
+    address: "",
+    description: "",
+    foundedYear: 0,
+    type: "",
+    totalScholarships: 0,
+    totalAwarded: 0
   });
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/organization/getOrg", { withCredentials: true });
+        setProfileData(response.data);
+      } catch (error) {
+        console.error("Error fetching organization data:", error);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +67,7 @@ const OrgProfile = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="card-body pt-16">
           <div className="flex items-center justify-between">
             <h2 className="card-title text-2xl">
@@ -66,7 +80,7 @@ const OrgProfile = () => {
               {isEditing ? 'Cancel' : 'Edit Profile'}
             </button>
           </div>
-          
+
           <p className="text-base-content/70">{profileData.description}</p>
 
           <div className="stats shadow mt-4">
@@ -90,7 +104,7 @@ const OrgProfile = () => {
       <div className="card bg-base-100 shadow-xl mt-6">
         <div className="card-body">
           <h2 className="card-title">Organization Information</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="form-control">
@@ -101,11 +115,11 @@ const OrgProfile = () => {
                   type="text"
                   disabled={!isEditing}
                   value={profileData.name}
-                  onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                   className="input input-bordered"
                 />
               </div>
-              
+
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Organization Type</span>
@@ -114,7 +128,7 @@ const OrgProfile = () => {
                   type="text"
                   disabled={!isEditing}
                   value={profileData.type}
-                  onChange={(e) => setProfileData({...profileData, type: e.target.value})}
+                  onChange={(e) => setProfileData({ ...profileData, type: e.target.value })}
                   className="input input-bordered"
                 />
               </div>
@@ -129,7 +143,7 @@ const OrgProfile = () => {
                     type="email"
                     disabled={!isEditing}
                     value={profileData.email}
-                    onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                     className="input input-bordered w-full"
                   />
                 </div>
@@ -144,40 +158,8 @@ const OrgProfile = () => {
                   <input
                     type="tel"
                     disabled={!isEditing}
-                    value={profileData.phone}
-                    onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                    className="input input-bordered w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Website</span>
-                </label>
-                <div className="input-group">
-                  <span><Globe className="h-5 w-5" /></span>
-                  <input
-                    type="url"
-                    disabled={!isEditing}
-                    value={profileData.website}
-                    onChange={(e) => setProfileData({...profileData, website: e.target.value})}
-                    className="input input-bordered w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Address</span>
-                </label>
-                <div className="input-group">
-                  <span><MapPin className="h-5 w-5" /></span>
-                  <input
-                    type="text"
-                    disabled={!isEditing}
-                    value={profileData.address}
-                    onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                    value={profileData.contactNumber}
+                    onChange={(e) => setProfileData({ ...profileData, contactNumber: e.target.value })}
                     className="input input-bordered w-full"
                   />
                 </div>

@@ -13,10 +13,11 @@ export const signup = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
   const { fullName, email, password, Role, mobileNo } = req.body;
+  console.log(req.body);
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ msg: "User already exists" });
+      return res.status(200).json({ msg: "User already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
@@ -29,6 +30,7 @@ export const signup = async (req, res) => {
     await user.save();
     return res.status(201).json({ msg: "User created" });
   } catch (error) {
+    console.log(error.message)
     return res.status(500).json({ msg: "Server error" + error.message });
   }
 };
@@ -38,11 +40,11 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.json({ msg: "Invalid credentials" }).status(400);
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.json({ msg: "Invalid credentials" }).status(400);
     }
     const payload = {
       id: user.id,

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Building2, Mail, Lock } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const SignInOrganization = () => {
   const navigate = useNavigate();
@@ -9,12 +11,17 @@ const SignInOrganization = () => {
     password: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userType', 'organization');
-    localStorage.setItem('userEmail', formData.email);
-    navigate('/organization/dashboard');
+    const response = await axios.post("http://localhost:5000/api/organization/login", formData,{withCredentials: true});
+    if (response.data.message === "Login successful") {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userType', 'organization');
+      localStorage.setItem('userEmail', formData.email);
+      navigate("/organization/dashboard");
+    } else {
+      toast.error(response.data.message);
+    }
   };
 
   return (
@@ -41,7 +48,7 @@ const SignInOrganization = () => {
                     placeholder="organization@example.com"
                     className="input input-bordered flex-1"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                   />
                 </div>
@@ -57,7 +64,7 @@ const SignInOrganization = () => {
                     placeholder="Enter your password"
                     className="input input-bordered flex-1"
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
                   />
                 </div>

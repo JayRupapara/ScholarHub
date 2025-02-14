@@ -1,27 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone } from 'lucide-react';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 const SignUpStudent = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    phone: '',
+    mobileNo: '',
     password: '',
     confirmPassword: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userType', 'student');
-    localStorage.setItem('userEmail', formData.email);
-    navigate('/student/dashboard');
+    const response = await axios.post("http://localhost:5000/api/users/signup", formData);
+    if (response.data.msg === "User created") {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userType', 'student');
+      localStorage.setItem('userEmail', formData.email);
+      navigate("/student/dashboard");
+    } else {
+      toast.error(response.data.msg);
+    }
+
+    navigate('/signin/student');
   };
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center py-8">
+      <ToastContainer />
       <div className="max-w-4xl w-full px-6">
         <div className="text-center mb-8">
           <User className="w-12 h-12 mx-auto text-primary mb-4" />
@@ -45,7 +55,7 @@ const SignUpStudent = () => {
                       placeholder="Enter your full name"
                       className="input input-bordered flex-1"
                       value={formData.fullName}
-                      onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       required
                     />
                   </div>
@@ -61,7 +71,7 @@ const SignUpStudent = () => {
                       placeholder="Enter your email"
                       className="input input-bordered flex-1"
                       value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                     />
                   </div>
@@ -76,8 +86,8 @@ const SignUpStudent = () => {
                       type="tel"
                       placeholder="Enter phone number"
                       className="input input-bordered flex-1"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      value={formData.mobileNo}
+                      onChange={(e) => setFormData({ ...formData, mobileNo: e.target.value })}
                       required
                     />
                   </div>
@@ -93,7 +103,7 @@ const SignUpStudent = () => {
                       placeholder="Create a password"
                       className="input input-bordered flex-1"
                       value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       required
                     />
                   </div>
@@ -109,7 +119,7 @@ const SignUpStudent = () => {
                       placeholder="Confirm your password"
                       className="input input-bordered flex-1"
                       value={formData.confirmPassword}
-                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       required
                     />
                   </div>
