@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { uploadFileToS3 } from "../services/s3.js";
+import Organization from "../models/organization.model.js";
+import Scholarship from "../models/scholarship.model.js";
+import userScholarship from "../models/userScholarship.model.js";
 
 export const signup = async (req, res) => {
   const errors = validationResult(req);
@@ -24,9 +27,9 @@ export const signup = async (req, res) => {
       mobileNo,
     });
     await user.save();
-    res.status(201).json({ msg: "User created" });
+    return res.status(201).json({ msg: "User created" });
   } catch (error) {
-    res.status(500).json({ msg: "Server error" });
+    return res.status(500).json({ msg: "Server error" + error.message });
   }
 };
 
@@ -103,4 +106,54 @@ export const uploadDocument = async (req, res) => {
     console.error("Upload error:", error);
     return res.status(500).json({ error: "File upload failed" });
   }
+};
+
+// Updated checkEligibility function
+const checkEligibility = async (user, scholarshipId) => {
+  try {
+    const scholarship = await Scholarship.findById(scholarshipId);
+    const { eligibilityRequirements } = scholarship;
+    // Check max income
+    if (eligibilityRequirements.maxIncome && user.familyIncome && user.familyIncome > eligibilityRequirements.maxIncome) {
+      return false;
+    }
+    // Check disability
+    if (eligibilityRequirements.disability !== user.disability) {
+      return false;
+    }
+    
+    // Check category
+    if (eligibilityRequirements.category.length !== 0 && !eligibilityRequirements.category.includes(user.caste)) {
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Eligibility check error:", error);
+    return false;
+  }
+};
+
+// Updated applyScholarship function
+export const applyScholarship = async (req, res) => {
+  const userId = req.user.id;
+  const { scholarshipId } = req.body;
+
+  // Check user role
+  const user = await User.findById(userId);
+
+  // Check eligibility criteria
+  const isEligible = await checkEligibility(user, scholarshipId);
+
+  if (!isEligible) {
+    return res.status(400).json({ msg: "User is not eligible to apply for this scholarship." });
+  }
+  const data = new userScholarship({
+    userID: userId,
+    scholarshipID: scholarshipId,
+    status: "Active",
+  });
+  console.log(data)
+  await data.save();
+
+  return res.json({ msg: "Application submitted successfully." });
 };
