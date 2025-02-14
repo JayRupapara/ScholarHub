@@ -57,11 +57,6 @@ const OrganizationLayout = ({ children }: OrganizationLayoutProps) => {
       path: '/organization/applications' 
     },
     { 
-      name: 'Analytics', 
-      icon: ChartBarIcon, 
-      path: '/organization/analytics' 
-    },
-    { 
       name: 'Profile', 
       icon: UserIcon, 
       path: '/organization/profile' 
@@ -92,7 +87,6 @@ const OrganizationLayout = ({ children }: OrganizationLayoutProps) => {
                   {location.pathname === '/organization/dashboard' ? 'Dashboard' :
                    location.pathname === '/organization/manage-scholarships' ? 'Manage Scholarships' :
                    location.pathname === '/organization/applications' ? 'Applications' :
-                   location.pathname === '/organization/analytics' ? 'Analytics' :
                    location.pathname === '/organization/profile' ? 'Profile' : ''}
                 </h1>
               </div>

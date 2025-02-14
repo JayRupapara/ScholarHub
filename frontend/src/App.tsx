@@ -25,7 +25,6 @@ import Profile from './pages/student/Profile';
 import OrgDashboard from './pages/organization/OrgDashboard';
 import ManageScholarships from './pages/organization/ManageScholarships';
 import Applications from './pages/organization/Applications';
-import Analytics from './pages/organization/Analytics';
 import OrgProfile from './pages/organization/OrgProfile';
 
 // Auth helpers
@@ -124,7 +123,6 @@ function App() {
                     <Route path="dashboard" element={<OrgDashboard />} />
                     <Route path="manage-scholarships" element={<ManageScholarships />} />
                     <Route path="applications" element={<Applications />} />
-                    <Route path="analytics" element={<Analytics />} />
                     <Route path="profile" element={<OrgProfile />} />
                   </Routes>
                 </OrganizationLayout>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, Download, Eye, CheckCircle, XCircle } from 'lucide-react';
+import ApplicationModal from '../../components/common/ApplicationModal';
 
 interface Application {
   id: number;
@@ -8,10 +9,24 @@ interface Application {
   submittedDate: string;
   status: 'pending' | 'approved' | 'rejected';
   amount: number;
+  studentDetails: {
+    email: string;
+    phone: string;
+    qualification: string;
+    income: number;
+    caste: string;
+  };
+  documents: {
+    name: string;
+    status: 'verified' | 'pending' | 'rejected';
+    url: string;
+  }[];
 }
 
 const Applications = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [showModal, setShowModal] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   
   // Sample applications data
   const applications: Application[] = [
@@ -21,7 +36,20 @@ const Applications = () => {
       scholarshipName: "STEM Excellence Scholarship",
       submittedDate: "2024-02-10",
       status: "pending",
-      amount: 10000
+      amount: 10000,
+      studentDetails: {
+        email: "john@example.com",
+        phone: "1234567890",
+        qualification: "12th",
+        income: 250000,
+        caste: "General"
+      },
+      documents: [
+        { name: "10th Marksheet", status: "verified", url: "#" },
+        { name: "12th Marksheet", status: "verified", url: "#" },
+        { name: "Income Certificate", status: "pending", url: "#" },
+        { name: "Caste Certificate", status: "pending", url: "#" }
+      ]
     },
     {
       id: 2,
@@ -29,7 +57,20 @@ const Applications = () => {
       scholarshipName: "Creative Arts Grant",
       submittedDate: "2024-02-08",
       status: "approved",
-      amount: 7500
+      amount: 7500,
+      studentDetails: {
+        email: "jane@example.com",
+        phone: "0987654321",
+        qualification: "10th",
+        income: 150000,
+        caste: "General"
+      },
+      documents: [
+        { name: "10th Marksheet", status: "verified", url: "#" },
+        { name: "12th Marksheet", status: "verified", url: "#" },
+        { name: "Income Certificate", status: "verified", url: "#" },
+        { name: "Caste Certificate", status: "verified", url: "#" }
+      ]
     },
     {
       id: 3,
@@ -37,7 +78,20 @@ const Applications = () => {
       scholarshipName: "Global Leaders Fund",
       submittedDate: "2024-02-05",
       status: "rejected",
-      amount: 15000
+      amount: 15000,
+      studentDetails: {
+        email: "mike@example.com",
+        phone: "5555555555",
+        qualification: "12th",
+        income: 300000,
+        caste: "General"
+      },
+      documents: [
+        { name: "10th Marksheet", status: "rejected", url: "#" },
+        { name: "12th Marksheet", status: "rejected", url: "#" },
+        { name: "Income Certificate", status: "rejected", url: "#" },
+        { name: "Caste Certificate", status: "rejected", url: "#" }
+      ]
     }
   ];
 
@@ -67,11 +121,68 @@ const Applications = () => {
     ? applications
     : applications.filter(app => app.status === selectedStatus);
 
+  const handleViewDetails = (application: Application) => {
+    setSelectedApplication(application);
+    setShowModal(true);
+  };
+
+  const handleExportData = () => {
+    // Convert applications data to CSV format
+    const headers = [
+      'Student Name',
+      'Email',
+      'Phone',
+      'Scholarship',
+      'Amount',
+      'Submitted Date',
+      'Status',
+      'Qualification',
+      'Income',
+      'Category'
+    ];
+
+    const csvData = filteredApplications.map(app => [
+      app.studentName,
+      app.studentDetails.email,
+      app.studentDetails.phone,
+      app.scholarshipName,
+      `₹${app.amount}`,
+      new Date(app.submittedDate).toLocaleDateString(),
+      app.status,
+      app.studentDetails.qualification,
+      `₹${app.studentDetails.income}`,
+      app.studentDetails.caste
+    ]);
+
+    // Add headers to the beginning
+    csvData.unshift(headers);
+
+    // Convert to CSV string
+    const csvString = csvData
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `scholarship_applications_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Scholarship Applications</h1>
-        <button className="btn btn-outline btn-primary gap-2">
+        <button 
+          className="btn btn-outline btn-primary gap-2"
+          onClick={handleExportData}
+        >
           <Download className="h-4 w-4" />
           Export Data
         </button>
@@ -129,7 +240,10 @@ const Applications = () => {
                   </div>
                 </td>
                 <td>
-                  <button className="btn btn-ghost btn-sm">
+                  <button 
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => handleViewDetails(application)}
+                  >
                     View Details
                   </button>
                 </td>
@@ -152,6 +266,103 @@ const Applications = () => {
           <button className="join-item btn btn-sm">Next</button>
         </div>
       </div>
+
+      {/* View Details Modal */}
+      <ApplicationModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Application Details"
+      >
+        {selectedApplication && (
+          <div className="space-y-6">
+            {/* Student Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Student Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Name</p>
+                  <p className="font-medium">{selectedApplication.studentName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">{selectedApplication.studentDetails.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="font-medium">{selectedApplication.studentDetails.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Qualification</p>
+                  <p className="font-medium">{selectedApplication.studentDetails.qualification}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Annual Income</p>
+                  <p className="font-medium">₹{selectedApplication.studentDetails.income.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Category</p>
+                  <p className="font-medium">{selectedApplication.studentDetails.caste}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Documents Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Documents</h3>
+              <div className="space-y-3">
+                {selectedApplication.documents.map((doc, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-base-200 rounded-lg">
+                    <span className="font-medium">{doc.name}</span>
+                    <div className="flex items-center gap-4">
+                      <span className={`badge badge-sm ${
+                        doc.status === 'verified' ? 'badge-success' :
+                        doc.status === 'rejected' ? 'badge-error' :
+                        'badge-warning'
+                      }`}>
+                        {doc.status}
+                      </span>
+                      <a 
+                        href={doc.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost btn-sm"
+                      >
+                        View
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 mt-6">
+              {selectedApplication.status === 'pending' && (
+                <>
+                  <button 
+                    className="btn btn-error"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Reject
+                  </button>
+                  <button 
+                    className="btn btn-success"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Approve
+                  </button>
+                </>
+              )}
+              <button 
+                className="btn btn-ghost"
+                onClick={() => setShowModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </ApplicationModal>
     </div>
   );
 };

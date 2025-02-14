@@ -1,5 +1,6 @@
 import React from 'react';
-import { Users, Award, DollarSign, Clock, TrendingUp, ChevronRight } from 'lucide-react';
+import { Users, Award, BarChart2 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const OrgDashboard = () => {
   // Sample data
@@ -17,20 +18,6 @@ const OrgDashboard = () => {
       change: "+2",
       icon: Award,
       color: "secondary"
-    },
-    {
-      title: "Total Awarded",
-      value: "$284K",
-      change: "+$24K",
-      icon: DollarSign,
-      color: "accent"
-    },
-    {
-      title: "Pending Reviews",
-      value: "45",
-      change: "-5",
-      icon: Clock,
-      color: "warning"
     }
   ];
 
@@ -58,34 +45,20 @@ const OrgDashboard = () => {
     }
   ];
 
-  const popularScholarships = [
-    {
-      id: 1,
-      title: "STEM Excellence Scholarship",
-      applications: 45,
-      trend: "+12%",
-      amount: 10000
-    },
-    {
-      id: 2,
-      title: "Creative Arts Grant",
-      applications: 28,
-      trend: "+8%",
-      amount: 7500
-    },
-    {
-      id: 3,
-      title: "Future Leaders Fund",
-      applications: 36,
-      trend: "+15%",
-      amount: 15000
-    }
+  // Analytics data
+  const analyticsData = [
+    { name: 'Jan', applications: 65 },
+    { name: 'Feb', applications: 85 },
+    { name: 'Mar', applications: 72 },
+    { name: 'Apr', applications: 99 },
+    { name: 'May', applications: 87 },
+    { name: 'Jun', applications: 105 },
   ];
 
   return (
     <div className="p-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2">
         {stats.map((stat, index) => (
           <div key={index} className="bg-base-100 rounded-xl shadow-sm p-6">
             <div className="flex items-center">
@@ -135,29 +108,31 @@ const OrgDashboard = () => {
           </div>
         </div>
 
-        {/* Popular Scholarships */}
+        {/* Analytics Chart */}
         <div className="bg-base-100 rounded-xl shadow-sm">
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Popular Scholarships</h2>
-              <button className="btn btn-ghost btn-sm">View All</button>
+              <h2 className="text-lg font-semibold">Application Trends</h2>
+              <div className="flex items-center gap-2">
+                <BarChart2 className="h-5 w-5 text-gray-500" />
+                <span className="text-sm text-gray-500">Last 6 months</span>
+              </div>
             </div>
-            <div className="space-y-4">
-              {popularScholarships.map((scholarship) => (
-                <div key={scholarship.id} className="flex items-center justify-between p-4 bg-base-200 rounded-lg">
-                  <div>
-                    <p className="font-medium">{scholarship.title}</p>
-                    <p className="text-sm text-gray-500">${scholarship.amount.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center text-success">
-                      <TrendingUp className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{scholarship.trend}</span>
-                    </div>
-                    <p className="text-sm text-gray-500">{scholarship.applications} applications</p>
-                  </div>
-                </div>
-              ))}
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={analyticsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line 
+                    type="monotone" 
+                    dataKey="applications" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
