@@ -32,10 +32,6 @@ const userSchema = new mongoose.Schema({
       default: false,
     }
   }],
-  Role: {
-    type: String,
-    enum: ["User", "Organization"]
-  },
   highestQualification: {
     type: String,
     enum: ["10th", "12th", "UG", "PG", "PHD"]

@@ -1,62 +1,28 @@
 import mongoose from "mongoose";
 
-export const organizationSchema = new mongoose.Schema(
-  {
-    scholarshipName: {
-      type: String,
-      required: true,
-    },
-    Amount: {
-      type: Number,
-      required: true,
-    },
-    eligibilityRequirements: {
-      maxIncome: {
-        type: Number,
-        required: false,
-      },
-      disability: {
-        type: Boolean,
-      },
-      academic: {
-        minPercentage: {
-          type: Number,
-          min: 0,
-          max: 100,
-        },//hq
-        highestQualification:{
-          type: [String],
-          enum: ["10th", "12th", "UG", "PG", "PHD"]
-        }
-      },
-      category: {
-        type: [String],
-        enum: ["General", "OBC", "SC", "ST", "EWS", "Other"],
-        required: false,
-      },
-      otherRequirements: {
+const organizationSchema = new mongoose.Schema({
+    name: {
         type: String,
-        required: false,
-      },
     },
-
-    lastDate: {
-      type: Date,
-      required: true,
+    address: {
+        type: String,
     },
-    duration: {
-      type: String,
-      enum: ["OneTime", "Renewable"],
+    contactNumber: {
+        type: String,
     },
-    sahayType: {
-      type: String,
-      enum: ["Lump-Sum", "Installments"],
+    email: {
+        type: String,
+        unique: true,
     },
-    PaymentMethods: {
-      type: String,
+    type: {
+        type: String,
+        enum: ["Non-Profit", "For-Profit", "Government"],
     },
-  },
-  {
+    description: {
+        type: String,
+    },
+}, {
     timestamps: true,
-  }
-);
+});
+
+export default mongoose.model("Organization", organizationSchema);

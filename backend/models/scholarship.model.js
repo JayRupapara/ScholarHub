@@ -1,19 +1,59 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-export const scholarshipSchema = new mongoose.Schema({
-    userID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+export const scholarshipSchema = new mongoose.Schema(
+  {
+    scholarshipName: {
+      type: String,
+      required: true,
     },
-    scholarshipID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Scholarship',
-        required: true,
+    Amount: {
+      type: Number,
+      required: true,
     },
-    status:{
+    eligibilityRequirements: {
+      maxIncome: {
+        type: Number,
+        required: false,
+      },
+      disability: {
+        type: Boolean,
+      },
+      academic: {
+        minPercentage: {
+          type: Number,
+          min: 0,
+          max: 100,
+        },//hq
+        highestQualification:{
+          type: [String],
+          enum: ["10th", "12th", "UG", "PG", "PHD"]
+        }
+      },
+      category: {
+        type: [String],
+        enum: ["General", "OBC", "SC", "ST", "EWS", "Other"],
+        required: false,
+      },
+      otherRequirements: {
         type: String,
-    }
-},{
-    timestamps: true
-})
+        required: false,
+      },
+    },
+
+    lastDate: {
+      type: Date,
+      required: true,
+    },
+    duration: {
+      type: String,
+      enum: ["OneTime", "Renewable"],
+    },
+    sahayType: {
+      type: String,
+      enum: ["Lump-Sum", "Installments"],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
