@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
     enum: ["10th", "12th", "UG", "PG", "PHD"]
   },
   gender:{
-    type: [String],
+    type: String,
     enum: ["Male","Female"]
   },
   disability: {
@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   caste: {
-    type: [String],
+    type: String,
     enum: ['General', 'ST', 'SC', 'OBC']
   },
   familyIncome: {
@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
   DOB: {
     type: Date
   },
-  bankDetails: [{
+  bankDetails: {
     accountNumber: {
       type: Number,
     },
@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema({
     branchName: {
       type: String,
     },
-  }],
+  },
 }, {
   timestamps: true,
 });

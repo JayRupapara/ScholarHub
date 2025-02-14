@@ -53,25 +53,52 @@ export const login = async (req, res) => {
   }
 };
 
+export const addDetails = async (req, res) => {
+  const { mobileNo, highestQualification, gender, disability, caste, familyIncome, DOB } = req.body;
+  const id = req.user.id;
+
+  const response = await User.updateOne({ _id: id }, {
+    mobileNo: mobileNo,
+    highestQualification: highestQualification,
+    gender: gender,
+    disability: disability,
+    caste: caste,
+    familyIncome: familyIncome,
+    DOB: DOB,
+  });
+  if (response.modifiedCount === 1) {
+    return res.json({ msg: "Details added" });
+  } else {
+    return res.json({ msg: "Error Adding data" + err.message });
+  }
+};
+
 export const uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    const type = req.params.type;
+
     const fileBuffer = req.file.buffer;
-    const fileName = `${Date.now()}-${req.file.originalname}`; // Unique file name
+    const fileName = `${Date.now()}-${req.file.originalname}`;
     const fileType = req.file.mimetype;
 
-    // Upload to S3
-    const fileUrl = await uploadFileToS3(fileBuffer, fileName, fileType);
+    const user = await User.findById(req.user.id);
+    await uploadFileToS3(fileBuffer, fileName, fileType);
+    user.documents.push({
+      documentId: "vbshdbv",
+      documentType: type,
+      documentURL: fileName,
+    })
 
-    res.json({
+    user.save();
+    return res.json({
       message: "File uploaded successfully",
-      fileUrl,
     });
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({ error: "File upload failed" });
+    return res.status(500).json({ error: "File upload failed" });
   }
 };

@@ -17,12 +17,10 @@ export default (req, res, next) => {
                 });
             } else {
                 req.user = user;
-                console.log("user", user);
                 next();
             }
         });
     } catch (error) {
-        // console.log(error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             message: error.message,
             success: false
