@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, Mail, Phone, School, BookOpen, DollarSign } from 'lucide-react';
-import { userProfile } from '../data/dummyData';
+import { userProfile } from "../../data/dummyData";
 
 const Profile = () => {
   const [profileData, setProfileData] = useState(userProfile);
