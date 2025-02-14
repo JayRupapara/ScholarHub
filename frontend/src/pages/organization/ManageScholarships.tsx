@@ -10,11 +10,29 @@ interface Scholarship {
   applicants: number;
   status: 'active' | 'draft' | 'closed';
   field: string;
+  description: string;
+  requirements: string[];
 }
 
 const ManageScholarships = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedScholarship, setSelectedScholarship] = useState<Scholarship | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    scholarshipName: '',
+    amount: '',
+    maxIncome: '',
+    disability: 'no',
+    minPercentage: '',
+    highestQualification: '',
+    category: '',
+    otherRequirements: '',
+    description: '',
+    lastDate: '',
+    duration: '',
+    sahayType: '',
+  });
 
   // Sample scholarships data
   const scholarships: Scholarship[] = [
@@ -25,7 +43,9 @@ const ManageScholarships = () => {
       deadline: "2024-05-15",
       applicants: 45,
       status: "active",
-      field: "Engineering"
+      field: "Engineering",
+      description: "A scholarship for students in the field of engineering",
+      requirements: ["GPA of 3.5 or higher", "Relevant engineering coursework"]
     },
     {
       id: 2,
@@ -34,7 +54,9 @@ const ManageScholarships = () => {
       deadline: "2024-05-30",
       applicants: 28,
       status: "active",
-      field: "Arts"
+      field: "Arts",
+      description: "A scholarship for students in the field of arts",
+      requirements: ["Portfolio submission", "Art history coursework"]
     },
     {
       id: 3,
@@ -43,7 +65,9 @@ const ManageScholarships = () => {
       deadline: "2024-06-01",
       applicants: 0,
       status: "draft",
-      field: "Business"
+      field: "Business",
+      description: "A scholarship for students in the field of business",
+      requirements: ["Business administration coursework", "Leadership experience"]
     }
   ];
 
@@ -63,6 +87,60 @@ const ManageScholarships = () => {
   const filteredScholarships = selectedStatus === 'all'
     ? scholarships
     : scholarships.filter(s => s.status === selectedStatus);
+
+  const handleCreateOrUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle create/update logic here
+    setShowModal(false);
+    setFormData({
+      scholarshipName: '',
+      amount: '',
+      maxIncome: '',
+      disability: 'no',
+      minPercentage: '',
+      highestQualification: '',
+      category: '',
+      otherRequirements: '',
+      description: '',
+      lastDate: '',
+      duration: '',
+      sahayType: '',
+    });
+    setIsEditing(false);
+  };
+
+  const handleEdit = (scholarship: Scholarship) => {
+    setSelectedScholarship(scholarship);
+    setFormData({
+      scholarshipName: scholarship.title,
+      amount: scholarship.amount.toString(),
+      maxIncome: '',
+      disability: 'no',
+      minPercentage: '',
+      highestQualification: '',
+      category: '',
+      otherRequirements: scholarship.requirements?.join('\n') || '',
+      description: scholarship.description || '',
+      lastDate: scholarship.deadline,
+      duration: '',
+      sahayType: '',
+    });
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const handleDelete = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this scholarship?')) {
+      // Handle delete logic here
+      console.log('Deleting scholarship:', id);
+    }
+  };
+
+  const handleView = (scholarship: Scholarship) => {
+    setSelectedScholarship(scholarship);
+    setIsEditing(false);
+    setShowModal(true);
+  };
 
   return (
     <div className="p-6">
@@ -129,13 +207,13 @@ const ManageScholarships = () => {
                 </td>
                 <td>
                   <div className="flex gap-2">
-                    <button className="btn btn-ghost btn-sm">
+                    <button className="btn btn-ghost btn-sm" onClick={() => handleView(scholarship)}>
                       <Eye className="h-4 w-4" />
                     </button>
-                    <button className="btn btn-ghost btn-sm">
+                    <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(scholarship)}>
                       <Edit className="h-4 w-4" />
                     </button>
-                    <button className="btn btn-ghost btn-sm text-error">
+                    <button className="btn btn-ghost btn-sm text-error" onClick={() => handleDelete(scholarship.id)}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -163,13 +241,189 @@ const ManageScholarships = () => {
       {/* Create/Edit Scholarship Modal */}
       <ApplicationModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Create New Scholarship"
+        onClose={() => {
+          setShowModal(false);
+          setIsEditing(false);
+          setSelectedScholarship(null);
+          setFormData({
+            scholarshipName: '',
+            amount: '',
+            maxIncome: '',
+            disability: 'no',
+            minPercentage: '',
+            highestQualification: '',
+            category: '',
+            otherRequirements: '',
+            lastDate: '',
+            duration: '',
+            sahayType: '',
+          });
+        }}
+        title={isEditing ? 'Edit Scholarship' : 'Create New Scholarship'}
       >
-        <div className="p-4">
-          {/* Add scholarship form here */}
-          <p>Scholarship form will go here</p>
-        </div>
+        <form onSubmit={handleCreateOrUpdate} className="space-y-4">
+          <div className="space-y-4">
+            {/* Row 1: Name and Amount */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1">Scholarship Name</label>
+                <input
+                  type="text"
+                  className="input input-bordered input-sm w-full"
+                  value={formData.scholarshipName}
+                  onChange={(e) => setFormData({...formData, scholarshipName: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Amount (₹)</label>
+                <input
+                  type="number"
+                  className="input input-bordered input-sm w-full"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Income and Percentage */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1">Max Family Income (₹)</label>
+                <input
+                  type="number"
+                  className="input input-bordered input-sm w-full"
+                  value={formData.maxIncome}
+                  onChange={(e) => setFormData({...formData, maxIncome: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Min Academic %</label>
+                <input
+                  type="number"
+                  className="input input-bordered input-sm w-full"
+                  value={formData.minPercentage}
+                  onChange={(e) => setFormData({...formData, minPercentage: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Row 3: Qualification, Category and Disability */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm mb-1">Qualification</label>
+                <select
+                  className="select select-bordered select-sm w-full"
+                  value={formData.highestQualification}
+                  onChange={(e) => setFormData({...formData, highestQualification: e.target.value})}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="10th">10th</option>
+                  <option value="12th">12th</option>
+                  <option value="ug">UG</option>
+                  <option value="pg">PG</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Category</label>
+                <select
+                  className="select select-bordered select-sm w-full"
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="general">General</option>
+                  <option value="sc">SC</option>
+                  <option value="st">ST</option>
+                  <option value="obc">OBC</option>
+                  <option value="ews">EWS</option>
+                  <option value="others">Others</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Disability</label>
+                <select
+                  className="select select-bordered select-sm w-full"
+                  value={formData.disability}
+                  onChange={(e) => setFormData({...formData, disability: e.target.value})}
+                  required
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Row 4: Duration, Type and Last Date */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm mb-1">Duration</label>
+                <select
+                  className="select select-bordered select-sm w-full"
+                  value={formData.duration}
+                  onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="onetime">One Time</option>
+                  <option value="renewable">Renewable</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Sahay Type</label>
+                <select
+                  className="select select-bordered select-sm w-full"
+                  value={formData.sahayType}
+                  onChange={(e) => setFormData({...formData, sahayType: e.target.value})}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="lumpsum">Lumpsum</option>
+                  <option value="installments">Installments</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Last Date</label>
+                <input
+                  type="date"
+                  className="input input-bordered input-sm w-full"
+                  value={formData.lastDate}
+                  onChange={(e) => setFormData({...formData, lastDate: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Row 5: Other Requirements */}
+            <div>
+              <label className="block text-sm mb-1">Other Requirements</label>
+              <textarea
+                className="textarea textarea-bordered w-full h-16 text-sm"
+                value={formData.otherRequirements}
+                onChange={(e) => setFormData({...formData, otherRequirements: e.target.value})}
+                placeholder="Enter any additional requirements"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => setShowModal(false)}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn btn-sm btn-primary">
+              {isEditing ? 'Update' : 'Create'} Scholarship
+            </button>
+          </div>
+        </form>
       </ApplicationModal>
     </div>
   );
