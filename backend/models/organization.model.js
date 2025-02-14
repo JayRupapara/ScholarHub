@@ -1,31 +1,38 @@
 import mongoose from "mongoose";
 
-const organizationSchema = new mongoose.Schema({
+const organizationSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
+      type: String,
     },
     address: {
-        type: String,
+      type: String,
     },
     contactNumber: {
-        type: String,
+      type: String,
     },
     email: {
-        type: String,
-        unique: true,
+      type: String,
+      unique: true,
     },
     type: {
-        type: String,
-        enum: ["Non-Profit", "For-Profit", "Government"],
+      type: String,
+      enum: ["Non-Profit", "For-Profit", "Government"],
     },
     description: {
-        type: String,
+      type: String,
     },
     password: {
-        type: String
-    }
-}, {
+      type: String,
+    },
+  },
+  {
     timestamps: true,
-});
+  }
+);
+
+organizationSchema.index({ name: "text" });
+organizationSchema.index({ email: 1 });
+organizationSchema.index({ type: 1 });
 
 export default mongoose.model("Organization", organizationSchema);

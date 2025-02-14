@@ -24,10 +24,10 @@ const scholarshipSchema = new mongoose.Schema(
           min: 0,
           max: 100,
         },
-        highestQualification:{
+        highestQualification: {
           type: [String],
-          enum: ["10th", "12th", "UG", "PG", "PHD"]
-        }
+          enum: ["10th", "12th", "UG", "PG", "PHD"],
+        },
       },
       category: {
         type: [String],
@@ -58,4 +58,17 @@ const scholarshipSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("scholarship", scholarshipSchema);
+scholarshipSchema.index({ scholarshipName: "text" }); // For name-based search
+scholarshipSchema.index({ "eligibilityRequirements.maxIncome": 1 });
+scholarshipSchema.index({
+  "eligibilityRequirements.academic.minPercentage": 1,
+});
+scholarshipSchema.index({
+  "eligibilityRequirements.academic.highestQualification": 1,
+});
+scholarshipSchema.index({ "eligibilityRequirements.category": 1 });
+scholarshipSchema.index({ lastDate: 1 });
+scholarshipSchema.index({ duration: 1 });
+scholarshipSchema.index({ sahayType: 1 });
+
+export default mongoose.model("scholarships", scholarshipSchema);
