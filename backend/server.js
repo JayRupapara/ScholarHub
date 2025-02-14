@@ -3,6 +3,7 @@ dotenv.config();
 import express from "express";
 const app = express();
 import userRoutes from "./routes/user.route.js";
+import organizationRoutes from "./routes/organization.route.js";
 import cookieParser from "cookie-parser";
 app.use(express.json());
 
@@ -12,7 +13,8 @@ connectDB();
 
 app.use(cookieParser());
 
-app.use("/api/v1", userRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/organization",organizationRoutes);
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
