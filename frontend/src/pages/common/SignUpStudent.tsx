@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, GraduationCap, Phone } from 'lucide-react';
+import { User, Mail, Lock, Phone } from 'lucide-react';
 
 const SignUpStudent = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     phone: '',
-    school: '',
     password: '',
     confirmPassword: '',
   });
@@ -37,33 +35,17 @@ const SignUpStudent = () => {
           <div className="card-body">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* First Name */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">First Name</label>
+                {/* Full Name */}
+                <div className="md:col-span-2">
+                  <label className="text-sm font-medium mb-2 block">Full Name</label>
                   <div className="flex items-center gap-4">
                     <User className="w-5 h-5 text-gray-500" />
                     <input
                       type="text"
-                      placeholder="Enter first name"
+                      placeholder="Enter your full name"
                       className="input input-bordered flex-1"
-                      value={formData.firstName}
-                      onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Last Name */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Last Name</label>
-                  <div className="flex items-center gap-4">
-                    <User className="w-5 h-5 text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Enter last name"
-                      className="input input-bordered flex-1"
-                      value={formData.lastName}
-                      onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                       required
                     />
                   </div>
@@ -101,22 +83,6 @@ const SignUpStudent = () => {
                   </div>
                 </div>
 
-                {/* School */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">School</label>
-                  <div className="flex items-center gap-4">
-                    <GraduationCap className="w-5 h-5 text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Enter your school"
-                      className="input input-bordered flex-1"
-                      value={formData.school}
-                      onChange={(e) => setFormData({...formData, school: e.target.value})}
-                      required
-                    />
-                  </div>
-                </div>
-
                 {/* Password */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Password</label>
@@ -134,7 +100,7 @@ const SignUpStudent = () => {
                 </div>
 
                 {/* Confirm Password */}
-                <div className="md:col-span-2">
+                <div>
                   <label className="text-sm font-medium mb-2 block">Confirm Password</label>
                   <div className="flex items-center gap-4">
                     <Lock className="w-5 h-5 text-gray-500" />
