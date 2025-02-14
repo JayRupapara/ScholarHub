@@ -4,6 +4,7 @@ import StudentLayout from './layouts/StudentLayout';
 import OrganizationLayout from './layouts/OrganizationLayout';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
+import { Toaster } from 'react-hot-toast';
 
 // Common Pages
 import HomePage from './pages/common/HomePage';
@@ -78,61 +79,64 @@ const PublicLayout = () => {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<PublicLayout />}>
-          {/* Landing Page */}
-          <Route path="/" element={<HomePage />} />
-          
-          {/* Auth Routes */}
-          <Route path="/signin/student" element={<SignInStudent />} />
-          <Route path="/signin/organization" element={<SignInOrganization />} />
-          <Route path="/signup/student" element={<SignUpStudent />} />
-          <Route path="/signup/organization" element={<SignUpOrganization />} />
-        </Route>
+    <>
+      <Toaster position="top-right" />
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route element={<PublicLayout />}>
+            {/* Landing Page */}
+            <Route path="/" element={<HomePage />} />
+            
+            {/* Auth Routes */}
+            <Route path="/signin/student" element={<SignInStudent />} />
+            <Route path="/signin/organization" element={<SignInOrganization />} />
+            <Route path="/signup/student" element={<SignUpStudent />} />
+            <Route path="/signup/organization" element={<SignUpOrganization />} />
+          </Route>
 
-        {/* Student Dashboard Routes */}
-        <Route
-          path="/student/*"
-          element={
-            <PrivateRoute allowedUserType="student">
-              <StudentLayout>
-                <Routes>
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="scholarships" element={<ScholarshipsPage />} />
-                  <Route path="applied" element={<AppliedScholarships />} />
-                  <Route path="saved" element={<SavedScholarships />} />
-                  <Route path="calendar" element={<Calendar />} />
-                  <Route path="profile" element={<Profile />} />
-                </Routes>
-              </StudentLayout>
-            </PrivateRoute>
-          }
-        />
+          {/* Student Dashboard Routes */}
+          <Route
+            path="/student/*"
+            element={
+              <PrivateRoute allowedUserType="student">
+                <StudentLayout>
+                  <Routes>
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="scholarships" element={<ScholarshipsPage />} />
+                    <Route path="applied" element={<AppliedScholarships />} />
+                    <Route path="saved" element={<SavedScholarships />} />
+                    <Route path="calendar" element={<Calendar />} />
+                    <Route path="profile" element={<Profile />} />
+                  </Routes>
+                </StudentLayout>
+              </PrivateRoute>
+            }
+          />
 
-        {/* Organization Dashboard Routes */}
-        <Route
-          path="/organization/*"
-          element={
-            <PrivateRoute allowedUserType="organization">
-              <OrganizationLayout>
-                <Routes>
-                  <Route path="dashboard" element={<OrgDashboard />} />
-                  <Route path="manage-scholarships" element={<ManageScholarships />} />
-                  <Route path="applications" element={<Applications />} />
-                  <Route path="analytics" element={<Analytics />} />
-                  <Route path="profile" element={<OrgProfile />} />
-                </Routes>
-              </OrganizationLayout>
-            </PrivateRoute>
-          }
-        />
+          {/* Organization Dashboard Routes */}
+          <Route
+            path="/organization/*"
+            element={
+              <PrivateRoute allowedUserType="organization">
+                <OrganizationLayout>
+                  <Routes>
+                    <Route path="dashboard" element={<OrgDashboard />} />
+                    <Route path="manage-scholarships" element={<ManageScholarships />} />
+                    <Route path="applications" element={<Applications />} />
+                    <Route path="analytics" element={<Analytics />} />
+                    <Route path="profile" element={<OrgProfile />} />
+                  </Routes>
+                </OrganizationLayout>
+              </PrivateRoute>
+            }
+          />
 
-        {/* Catch all route - Redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Catch all route - Redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

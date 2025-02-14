@@ -33,12 +33,13 @@ export default function AppliedScholarships() {
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          {/* Stats Summary */}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          {/* Stats Summary - Updated with 4 columns */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
             {[
               { label: "Total Applied", value: "15", color: "primary" },
               { label: "Under Review", value: "3", color: "warning" },
-              { label: "Accepted", value: "5", color: "success" }
+              { label: "Accepted", value: "5", color: "success" },
+              { label: "Rejected", value: "2", color: "error" }
             ].map((stat, i) => (
               <div key={i} className="bg-base-100 rounded-xl shadow-sm p-6">
                 <div className="text-sm font-medium text-gray-500">{stat.label}</div>

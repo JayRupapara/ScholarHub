@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import ApplicationModal from '../../components/common/ApplicationModal';
 
 interface Scholarship {
@@ -12,6 +12,14 @@ interface Scholarship {
   field: string;
   description: string;
   requirements: string[];
+}
+
+// Add new interface for document requirements
+interface DocumentRequirement {
+  id: string;
+  name: string;
+  required: boolean;
+  otherDetails?: string[];
 }
 
 const ManageScholarships = () => {
@@ -33,6 +41,17 @@ const ManageScholarships = () => {
     duration: '',
     sahayType: '',
   });
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [documentRequirements, setDocumentRequirements] = useState<DocumentRequirement[]>([
+    { id: '10th', name: '10th Result', required: false },
+    { id: '12th', name: '12th Result', required: false },
+    { id: 'income', name: 'Income Certificate', required: false },
+    { id: 'ews', name: 'EWS Certificate', required: false },
+    { id: 'caste', name: 'Caste Certificate', required: false },
+    { id: 'aadhar', name: 'Aadhar Card', required: false },
+    { id: 'pan', name: 'PAN Card', required: false },
+    { id: 'other', name: 'Other Documents', required: false, otherDetails: [] }
+  ]);
 
   // Sample scholarships data
   const scholarships: Scholarship[] = [
@@ -90,7 +109,12 @@ const ManageScholarships = () => {
 
   const handleCreateOrUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle create/update logic here
+    setShowDocumentModal(true);
+  };
+
+  const handleDocumentSubmit = () => {
+    console.log('Selected documents:', documentRequirements.filter(doc => doc.required));
+    setShowDocumentModal(false);
     setShowModal(false);
     setFormData({
       scholarshipName: '',
@@ -107,6 +131,55 @@ const ManageScholarships = () => {
       sahayType: '',
     });
     setIsEditing(false);
+  };
+
+  const handleDocumentChange = (id: string, checked: boolean) => {
+    setDocumentRequirements(prev => 
+      prev.map(doc => 
+        doc.id === id ? { ...doc, required: checked } : doc
+      )
+    );
+  };
+
+  const handleOtherDetailsChange = (index: number, value: string) => {
+    setDocumentRequirements(prev => 
+      prev.map(doc => 
+        doc.id === 'other' 
+          ? { 
+              ...doc, 
+              otherDetails: doc.otherDetails?.map((detail, i) => 
+                i === index ? value : detail
+              ) || []
+            } 
+          : doc
+      )
+    );
+  };
+
+  const handleAddOtherDocument = () => {
+    setDocumentRequirements(prev => 
+      prev.map(doc => 
+        doc.id === 'other' 
+          ? { 
+              ...doc, 
+              otherDetails: [...(doc.otherDetails || []), '']
+            } 
+          : doc
+      )
+    );
+  };
+
+  const handleRemoveOtherDocument = (index: number) => {
+    setDocumentRequirements(prev => 
+      prev.map(doc => 
+        doc.id === 'other' 
+          ? { 
+              ...doc, 
+              otherDetails: doc.otherDetails?.filter((_, i) => i !== index) || []
+            } 
+          : doc
+      )
+    );
   };
 
   const handleEdit = (scholarship: Scholarship) => {
@@ -134,12 +207,6 @@ const ManageScholarships = () => {
       // Handle delete logic here
       console.log('Deleting scholarship:', id);
     }
-  };
-
-  const handleView = (scholarship: Scholarship) => {
-    setSelectedScholarship(scholarship);
-    setIsEditing(false);
-    setShowModal(true);
   };
 
   return (
@@ -207,14 +274,19 @@ const ManageScholarships = () => {
                 </td>
                 <td>
                   <div className="flex gap-2">
-                    <button className="btn btn-ghost btn-sm" onClick={() => handleView(scholarship)}>
-                      <Eye className="h-4 w-4" />
+                    <button 
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => handleEdit(scholarship)}
+                      title="Edit"
+                    >
+                      <Edit className="h-4 w-4 text-primary" />
                     </button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(scholarship)}>
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button className="btn btn-ghost btn-sm text-error" onClick={() => handleDelete(scholarship.id)}>
-                      <Trash2 className="h-4 w-4" />
+                    <button 
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => handleDelete(scholarship.id)}
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4 text-error" />
                     </button>
                   </div>
                 </td>
@@ -254,6 +326,7 @@ const ManageScholarships = () => {
             highestQualification: '',
             category: '',
             otherRequirements: '',
+            description: '',
             lastDate: '',
             duration: '',
             sahayType: '',
@@ -424,6 +497,81 @@ const ManageScholarships = () => {
             </button>
           </div>
         </form>
+      </ApplicationModal>
+
+      {/* Document Selection Modal */}
+      <ApplicationModal
+        isOpen={showDocumentModal}
+        onClose={() => setShowDocumentModal(false)}
+        title="Select Required Documents"
+      >
+        <div className="p-4">
+          <p className="text-sm text-gray-600 mb-4">
+            Select the documents that students need to upload for this scholarship:
+          </p>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {documentRequirements.map(doc => (
+              <div key={doc.id} className="flex flex-col">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    className="checkbox checkbox-primary"
+                    checked={doc.required}
+                    onChange={(e) => handleDocumentChange(doc.id, e.target.checked)}
+                  />
+                  <span className="text-sm">{doc.name}</span>
+                </label>
+                {doc.id === 'other' && doc.required && (
+                  <div className="mt-2 space-y-2">
+                    {doc.otherDetails?.map((detail, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          className="input input-bordered input-sm flex-1"
+                          placeholder="Specify other document"
+                          value={detail}
+                          onChange={(e) => handleOtherDetailsChange(index, e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm btn-square text-error"
+                          onClick={() => handleRemoveOtherDocument(index)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm text-primary"
+                      onClick={handleAddOtherDocument}
+                    >
+                      + Add Another Document
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => setShowDocumentModal(false)}
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-primary"
+              onClick={handleDocumentSubmit}
+            >
+              Save Requirements
+            </button>
+          </div>
+        </div>
       </ApplicationModal>
     </div>
   );

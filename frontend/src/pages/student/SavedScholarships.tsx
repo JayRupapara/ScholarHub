@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { scholarships } from '../../data/dummyData';
 import AnimatedScholarshipCard from '../../components/student/AnimatedScholarshipCard';
 import ApplicationModal from '../../components/common/ApplicationModal';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Trash2 } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
 
 interface Scholarship {
   id: number;
@@ -16,18 +17,31 @@ interface Scholarship {
   progress: number;
   university: string;
   location: string;
+  eligibility?: {
+    maxIncome?: number;
+    minGPA?: number;
+    caste?: string[];
+  };
 }
 
 const SavedScholarships = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedScholarship, setSelectedScholarship] = useState<Scholarship | null>(null);
+  const [savedScholarshipIds, setSavedScholarshipIds] = useState<number[]>([1, 2, 3]); // Demo IDs
+  const { showToast } = useToast();
 
-  // For demo, we'll show first 3 scholarships as saved
-  const savedScholarships = scholarships.slice(0, 3);
+  // For demo, we'll filter scholarships based on saved IDs
+  const savedScholarships = scholarships.filter(s => savedScholarshipIds.includes(s.id));
 
   const handleApply = (scholarship: Scholarship) => {
     setSelectedScholarship(scholarship);
     setShowModal(true);
+  };
+
+  const handleRemoveScholarship = (scholarshipId: number) => {
+    setSavedScholarshipIds(prev => prev.filter(id => id !== scholarshipId));
+    setShowModal(false);
+    showToast('Scholarship removed from saved', 'info');
   };
 
   return (
@@ -74,18 +88,50 @@ const SavedScholarships = () => {
       >
         <div className="space-y-4">
           <p>{selectedScholarship?.description}</p>
+          
           <div className="divider">Requirements</div>
           <ul className="list-disc list-inside">
             {selectedScholarship?.requirements?.map((req, idx) => (
               <li key={idx}>{req}</li>
             ))}
           </ul>
-          <div className="mt-4 flex justify-end">
+
+          <div className="divider">Eligibility</div>
+          <div className="grid grid-cols-2 gap-4">
+            {selectedScholarship?.eligibility?.maxIncome && (
+              <div>
+                <span className="text-sm font-medium">Maximum Family Income:</span>
+                <p>₹{selectedScholarship.eligibility.maxIncome.toLocaleString()}</p>
+              </div>
+            )}
+            {selectedScholarship?.eligibility?.minGPA && (
+              <div>
+                <span className="text-sm font-medium">Minimum GPA:</span>
+                <p>{selectedScholarship.eligibility.minGPA}</p>
+              </div>
+            )}
+            {selectedScholarship?.eligibility?.caste && (
+              <div>
+                <span className="text-sm font-medium">Eligible Categories:</span>
+                <p>{selectedScholarship.eligibility.caste.join(', ')}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Delete Button */}
+          <div className="mt-6 flex justify-between items-center">
+            <button 
+              className="btn hover:bg-primary hover:text-white btn-outline text-primary hover:border-primary gap-2"
+              onClick={() => selectedScholarship && handleRemoveScholarship(selectedScholarship.id)}
+            >
+              <Trash2 className="h-5 w-5" />
+              Remove from Saved
+            </button>
             <button 
               className="btn btn-primary"
               onClick={() => setShowModal(false)}
             >
-              Start Application
+              Close
             </button>
           </div>
         </div>
