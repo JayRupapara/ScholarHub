@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Building2, Mail, Lock, Phone, Globe } from 'lucide-react';
+import { Building2, Mail, Lock, Phone } from 'lucide-react';
 
 const SignUpOrganization = () => {
   const navigate = useNavigate();
@@ -8,7 +8,6 @@ const SignUpOrganization = () => {
     organizationName: '',
     email: '',
     phone: '',
-    website: '',
     password: '',
     confirmPassword: '',
   });
@@ -36,8 +35,8 @@ const SignUpOrganization = () => {
           <div className="card-body">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Organization Name */}
-                <div>
+                {/* Organization Name - Full Width */}
+                <div className="md:col-span-2">
                   <label className="text-sm font-medium mb-2 block">Organization Name</label>
                   <div className="flex items-center gap-4">
                     <Building2 className="w-5 h-5 text-gray-500" />
@@ -80,21 +79,6 @@ const SignUpOrganization = () => {
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       required
-                    />
-                  </div>
-                </div>
-
-                {/* Website */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Website</label>
-                  <div className="flex items-center gap-4">
-                    <Globe className="w-5 h-5 text-gray-500" />
-                    <input
-                      type="url"
-                      placeholder="https://example.com"
-                      className="input input-bordered flex-1"
-                      value={formData.website}
-                      onChange={(e) => setFormData({...formData, website: e.target.value})}
                     />
                   </div>
                 </div>
