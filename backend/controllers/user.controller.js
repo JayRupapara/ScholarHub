@@ -2,6 +2,8 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
+import multer from "multer";
+import { uploadFileToS3 } from "../services/s3.js";
 
 const signup = async (req, res) => {
   const errors = validationResult(req);
@@ -52,32 +54,26 @@ const login = async (req, res) => {
   }
 };
 
-const addDetails = async (req, res) => {
-  const { mobileNo, highestQualification, gender, disability, caste, familyIncome, DOB } = req.body;
-  const id = req.user.id;
+const upload = multer();
+export const uploadDocument = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
 
-  const response = await User.updateOne({ _id: id }, {
-    mobileNo: mobileNo,
-    highestQualification: highestQualification,
-    gender: gender,
-    disability: disability,
-    caste: caste,
-    familyIncome: familyIncome,
-    DOB: DOB,
-  });
-  if (response.modifiedCount === 1) {
-    return res.json({ msg: "Details added" });
-  } else {
-    return res.json({ msg: "Error Adding data" + err.message });
+    const fileBuffer = req.file.buffer;
+    const fileName = `${Date.now()}-${req.file.originalname}`; // Unique file name
+    const fileType = req.file.mimetype;
+
+    // Upload to S3
+    const fileUrl = await uploadFileToS3(fileBuffer, fileName, fileType);
+
+    res.json({
+      message: "File uploaded successfully",
+      fileUrl,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "File upload failed" });
   }
 };
-
-const applyForScholarship = async (req, res) => {
-  const { scholarshipID } = req.body;
-  const id= req.user.id;
-  
-};
-
-
-
-export { login, signup, addDetails };
