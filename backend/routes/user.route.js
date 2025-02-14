@@ -1,4 +1,4 @@
-import { signup, login } from "../controllers/user.js"; // ✅ Named imports
+import { signup, login } from "../controllers/user.controller.js"; // ✅ Named imports
 import { check } from "express-validator";
 import express from "express";
 
