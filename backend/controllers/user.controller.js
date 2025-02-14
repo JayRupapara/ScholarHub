@@ -2,10 +2,9 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
-import multer from "multer";
 import { uploadFileToS3 } from "../services/s3.js";
 
-const signup = async (req, res) => {
+export const signup = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -29,7 +28,7 @@ const signup = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -54,7 +53,6 @@ const login = async (req, res) => {
   }
 };
 
-const upload = multer();
 export const uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
