@@ -1,4 +1,4 @@
-import { signup, login, addDetails } from "../controllers/user.controller.js"; // ✅ Named imports
+import { signup, login, addDetails, applyScholarship } from "../controllers/user.controller.js"; 
 import authenticateToken from "../middleware/authenticateToken.js";
 import { check } from "express-validator";
 import express from "express";
@@ -9,7 +9,14 @@ const upload = multer();
 const router = express.Router();
 
 // Route to handle file upload
-router.post("/addDoc/:type", [upload.single("file"), authenticateToken], uploadDocument);
+router.post(
+  "/addDoc/:type",
+  [
+    upload.single("file"),
+    authenticateToken
+  ],
+  uploadDocument
+);
 
 // Signup route
 router.post(
@@ -32,6 +39,20 @@ router.post(
   login
 );
 
-router.post("/addDetails", [authenticateToken], addDetails);
+router.post(
+  "/addDetails",
+  [
+    authenticateToken
+  ],
+  addDetails
+);
+
+router.post(
+  "/applyScholarship",
+  [
+    authenticateToken
+  ],
+  applyScholarship
+)
 
 export default router;
