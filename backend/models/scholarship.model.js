@@ -11,6 +11,9 @@ export const scholarshipSchema = new mongoose.Schema({
         ref: 'Scholarship',
         required: true,
     },
+    status:{
+        type: String,
+    }
 },{
     timestamps: true
 })

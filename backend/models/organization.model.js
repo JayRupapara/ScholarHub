@@ -11,7 +11,7 @@ export const organizationSchema = new mongoose.Schema(
       required: true,
     },
     eligibility: {
-      type: Stirng,
+      type: String,
       required: true,
     },
     lastDate: {
