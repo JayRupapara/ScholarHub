@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 
-// Signup controller
 export const signup = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -28,7 +27,6 @@ export const signup = async (req, res) => {
   }
 };
 
-// Login controller
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
