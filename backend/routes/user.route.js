@@ -1,4 +1,4 @@
-import { signup, login, addDetails } from "../controllers/user.controller.js"; // ✅ Named imports
+import { signup, login, addDetails,getProfileDetails } from "../controllers/user.controller.js"; // ✅ Named imports
 import authenticateToken from "../middleware/authenticateToken.js";
 import { check } from "express-validator";
 import express from "express";
@@ -32,6 +32,19 @@ router.post(
   login
 );
 
-router.post("/addDetails", [authenticateToken], addDetails);
+router.post(
+  "/addDetails",
+  [
+    authenticateToken
+  ],
+  addDetails
+);
+
+router.get(
+  "/getProfile", 
+  [
+    authenticateToken
+  ],
+  getProfileDetails)
 
 export default router;

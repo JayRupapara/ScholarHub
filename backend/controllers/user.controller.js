@@ -104,3 +104,18 @@ export const uploadDocument = async (req, res) => {
     return res.status(500).json({ error: "File upload failed" });
   }
 };
+
+export const getProfileDetails = async (req, res) => {
+  const id = req.user.id;
+
+  try {
+    const userDetails = await User.findById(id).select('-password -__v -createdAt -updatedAt -documents');
+    if (!userDetails) {
+      return res.json({ error: "User not found" }).status(404);
+    }
+
+    return res.json(userDetails).status(200);
+  } catch (error) {
+    return res.json({ error: "Internal server error: " + error.message }).status(500);
+  }
+}
