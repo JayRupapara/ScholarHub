@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const scholarshipSchema = new mongoose.Schema(
+const scholarshipSchema = new mongoose.Schema(
   {
     scholarshipName: {
       type: String,
@@ -23,7 +23,7 @@ export const scholarshipSchema = new mongoose.Schema(
           type: Number,
           min: 0,
           max: 100,
-        },//hq
+        },
         highestQualification:{
           type: [String],
           enum: ["10th", "12th", "UG", "PG", "PHD"]
@@ -57,3 +57,5 @@ export const scholarshipSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+export default mongoose.model("scholarship", scholarshipSchema);
