@@ -10,10 +10,36 @@ export const organizationSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    eligibility: {
-      type: String,
-      required: true,
+    eligibilityRequirements: {
+      maxIncome: {
+        type: Number,
+        required: false,
+      },
+      disability: {
+        type: Boolean,
+      },
+      academic: {
+        minPercentage: {
+          type: Number,
+          min: 0,
+          max: 100,
+        },//hq
+        highestQualification:{
+          type: [String],
+          enum: ["10th", "12th", "UG", "PG", "PHD"]
+        }
+      },
+      category: {
+        type: [String],
+        enum: ["General", "OBC", "SC", "ST", "EWS", "Other"],
+        required: false,
+      },
+      otherRequirements: {
+        type: String,
+        required: false,
+      },
     },
+
     lastDate: {
       type: Date,
       required: true,

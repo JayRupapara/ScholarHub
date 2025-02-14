@@ -40,16 +40,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["10th", "12th", "UG", "PG", "PHD"]
   },
-  gender: {
-    type: String,
-    enum: ["Male", "Female"]
+  gender:{
+    type: [String],
+    enum: ["Male","Female"]
   },
   disability: {
     type: Boolean,
     default: false,
   },
   caste: {
-    type: String,
+    type: [String],
     enum: ['General', 'ST', 'SC', 'OBC']
   },
   familyIncome: {
