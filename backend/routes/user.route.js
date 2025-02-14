@@ -6,8 +6,6 @@ import { uploadDocument } from "../controllers/user.controller.js";
 import multer from "multer";
 const upload = multer();
 
-// import { uploadDocument } from "../controllers/user.js";
-
 const router = express.Router();
 
 // Route to handle file upload
@@ -17,7 +15,7 @@ router.post("/addDoc/:type", [upload.single("file"), authenticateToken], uploadD
 router.post(
   "/signup",
   [
-    check("username", "Username is required").not().isEmpty(),
+    check("fullName", "Full name is required").not().isEmpty(),
     check("email", "Email is required").isEmail(),
     check("password", "Password is required").isLength({ min: 6 }),
   ],

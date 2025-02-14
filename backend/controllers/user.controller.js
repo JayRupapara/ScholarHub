@@ -9,7 +9,7 @@ export const signup = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const { fullName, email, password, Role } = req.body;
+  const { fullName, email, password, Role, mobileNo } = req.body;
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -20,6 +20,8 @@ export const signup = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
+      Role,
+      mobileNo,
     });
     await user.save();
     res.status(201).json({ msg: "User created" });
