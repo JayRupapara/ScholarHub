@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { scholarships } from '../data/dummyData';
-import AnimatedScholarshipCard from '../components/AnimatedScholarshipCard';
-import ApplicationModal from '../components/ApplicationModal';
-import AlertMessage from '../components/AlertMessage';
+import { scholarships } from '../../data/dummyData';
+import AnimatedScholarshipCard from '../../components/student/AnimatedScholarshipCard';
+import ApplicationModal from '../../components/common/ApplicationModal';
+import AlertMessage from '../../components/common/AlertMessage';
 
 interface Scholarship {
   id: number;

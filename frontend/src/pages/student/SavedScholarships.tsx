@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { scholarships } from '../data/dummyData';
-import AnimatedScholarshipCard from '../components/AnimatedScholarshipCard';
-import ApplicationModal from '../components/ApplicationModal';
+import { scholarships } from '../../data/dummyData';
+import AnimatedScholarshipCard from '../../components/student/AnimatedScholarshipCard';
+import ApplicationModal from '../../components/common/ApplicationModal';
 import { Bookmark } from 'lucide-react';
 
 interface Scholarship {
