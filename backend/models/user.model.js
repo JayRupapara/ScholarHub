@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
       {
         documentType: {
           type: String,
+          enum: ["Aadhar Card", "Pan Card", "12th Marksheet", "10th Marksheet"],
         },
         documentId: {
           type: String,

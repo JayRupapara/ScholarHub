@@ -13,19 +13,21 @@ const scholarshipSchema = new mongoose.Schema(
     eligibilityRequirements: {
       maxIncome: {
         type: Number,
-        required: false,
+        default: 600000,
       },
       disability: {
         type: Boolean,
+        default: false,
       },
       academic: {
         minPercentage: {
           type: Number,
           min: 0,
           max: 100,
+          default: 70,
         },
         highestQualification: {
-          type: [String],
+          type: String,
           enum: ["10th", "12th", "UG", "PG", "PHD"],
         },
       },
@@ -38,6 +40,10 @@ const scholarshipSchema = new mongoose.Schema(
         type: String,
         required: false,
       },
+    },
+    documentUpload: {
+      type: String,
+      enum: ["Aadhar Card", "Pan Card", "10th Marksheet", "12th Marksheet"],
     },
 
     lastDate: {
