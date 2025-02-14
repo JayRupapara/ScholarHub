@@ -1,4 +1,5 @@
-import { signup, login } from "../controllers/user.controller.js"; // ✅ Named imports
+import { signup, login, addDetails } from "../controllers/user.controller.js"; // ✅ Named imports
+import authenticateToken from "../middleware/authenticateToken.js";
 import { check } from "express-validator";
 import express from "express";
 
@@ -23,6 +24,11 @@ router.post(
     check("password", "Password is required").isLength({ min: 6 }),
   ],
   login
+);
+
+router.post("/addDetails",
+  [authenticateToken],
+  addDetails
 );
 
 export default router;

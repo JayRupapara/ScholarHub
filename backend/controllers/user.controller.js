@@ -1,14 +1,14 @@
-import User from "../models/user.js";
+import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 
-export const signup = async (req, res) => {
+const signup = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const { username, email, password } = req.body;
+  const { fullName, email, password, Role } = req.body;
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -16,7 +16,7 @@ export const signup = async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
-      username,
+      fullName,
       email,
       password: hashedPassword,
     });
@@ -27,7 +27,7 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -39,23 +39,45 @@ export const login = async (req, res) => {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
     const payload = {
-      user: {
-        id: user.id,
-      },
+      id: user.id,
     };
     // Generate access and refresh tokens
-    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN, {
-      expiresIn: "1h",
-    });
-    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN, {
-      expiresIn: "1y",
-    });
+    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN);
 
     res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
     res.json({ msg: "Login success" });
   } catch (error) {
     res.status(500).json({ msg: "Server error" });
   }
 };
+
+const addDetails = async (req, res) => {
+  const { mobileNo, highestQualification, gender, disability, caste, familyIncome, DOB } = req.body;
+  const id = req.user.id;
+
+  const response = await User.updateOne({ _id: id }, {
+    mobileNo: mobileNo,
+    highestQualification: highestQualification,
+    gender: gender,
+    disability: disability,
+    caste: caste,
+    familyIncome: familyIncome,
+    DOB: DOB,
+  });
+  if (response.modifiedCount === 1) {
+    return res.json({ msg: "Details added" });
+  } else {
+    return res.json({ msg: "Error Adding data" + err.message });
+  }
+};
+
+const applyForScholarship = async (req, res) => {
+  const { scholarshipID } = req.body;
+  const id= req.user.id;
+  
+};
+
+
+
+export { login, signup, addDetails };
