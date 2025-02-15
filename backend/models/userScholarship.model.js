@@ -11,10 +11,11 @@ const userScholarshipSchema = new mongoose.Schema({
         ref: 'scholarships',
         required: true,
     },
-    status:{
+    status: {
         type: String,
-    }
-},{
+    },
+    docs: { type: [String] }
+}, {
     timestamps: true
 })
 

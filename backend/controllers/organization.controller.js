@@ -3,6 +3,7 @@ import Organization from '../models/organization.model.js';
 import OrganizationScholarship from "../models/organizationScholarship.model.js";
 import UserScholarship from "../models/userScholarship.model.js"
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 export const signup = async (req, res) => {
     const { name, contactNumber, email, password, type } = req.body;
@@ -95,9 +96,21 @@ export const addsScholarship = async (req, res) => {
 export const getScholarshipDashboard = async (req, res) => {
     const organizationID = req.user.id;
     try {
-        // 1. Total Applications and Percentage Change
-        const totalApplications = await UserScholarship.countDocuments({ organizationID });
+        const organizationScholarships = await OrganizationScholarship.find({ organizationID: organizationID });
+        let totalApplications=0
 
+        if (!organizationScholarships || organizationScholarships.length === 0) {
+            
+        }
+
+        // Extract scholarship IDs
+        const scholarshipIDs = organizationScholarships.map(scholarship => scholarship.scholarshipID);
+
+        // Step 2: Find all users associated with these scholarships
+        const userScholarships = await UserScholarship.find({ scholarshipID: { $in: scholarshipIDs } })
+        console.log(userScholarships)
+        totalApplications = userScholarships.length;
+        // console.log(userScholarships)
         const oneMonthsAgo = new Date(new Date().setMonth(new Date().getMonth() - 1));
         const previousApplications = await UserScholarship.countDocuments({
             organizationID,
@@ -149,6 +162,30 @@ export const getScholarshipDashboard = async (req, res) => {
             applicationTrends: trendsData
         });
     } catch (error) {
-        return res.status(500).json({ message: "Error fetching dashboard data: " + error.message });
+        return res.json({ message: "Error fetching dashboard data: " + error.message }).status(500);
     }
 };
+
+export const getAppliedScholarship = async (req, res) => {
+    const id = req.user.id;
+    try {
+        const organizationScholarships = await OrganizationScholarship.find({ organizationID: id });
+
+        if (!organizationScholarships || organizationScholarships.length === 0) {
+            return res.status(404).json({ message: 'No scholarships found for this organization' });
+        }
+
+        // Extract scholarship IDs
+        const scholarshipIDs = organizationScholarships.map(scholarship => scholarship.scholarshipID);
+
+        // Step 2: Find all users associated with these scholarships
+        const userScholarships = await UserScholarship.find({ scholarshipID: { $in: scholarshipIDs } })
+
+        // // Extract unique users
+        // const users = userScholarships.map(userScholarship => userScholarship.userID)
+        // console.log(users)
+        return res.status(200).json({ userScholarships });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error retrieving scholarships: ' + error.message });
+    }
+}

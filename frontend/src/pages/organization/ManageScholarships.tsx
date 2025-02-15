@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import ApplicationModal from '../../components/common/ApplicationModal';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
@@ -20,7 +20,7 @@ interface DocumentRequirement {
   id: string;
   name: string;
   required: boolean;
-  otherDetails?: string;
+  otherDetails?: Array<any>;
 }
 
 const ManageScholarships = () => {
@@ -51,7 +51,7 @@ const ManageScholarships = () => {
     { id: 'caste', name: 'Caste Certificate', required: false },
     { id: 'aadhar', name: 'Aadhar Card', required: false },
     { id: 'pan', name: 'PAN Card', required: false },
-    { id: 'other', name: 'Other Documents', required: false, otherDetails: [] }
+    { id: 'other', name: 'Other Documents', required: false, otherDetails: [] },
   ]);
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
 
@@ -60,12 +60,13 @@ const ManageScholarships = () => {
       try {
         const response = await axios.get('http://localhost:5000/api/organization/getScholarships', { withCredentials: true });
         // Transform the data to ensure all required fields exist
+        console.log(response.data)
         const transformedData = response.data.map((scholarship: any) => ({
           id: scholarship.id,
-          title: scholarship.title || 'Untitled',
-          amount: scholarship.amount || 0,
-          deadline: scholarship.deadline || new Date().toISOString(),
-          status: scholarship.status || 'draft',
+          title: scholarship.scholarshipID.scholarshipName || 'Untitled',
+          amount: scholarship.scholarshipID.Amount || 0,
+          deadline: scholarship.scholarshipID.deadline || new Date().toISOString(),
+          status: scholarship.scholarshipID.status || 'draft',
           description: scholarship.description || '',
           requirements: scholarship.requirements || []
         }));
@@ -171,25 +172,31 @@ const ManageScholarships = () => {
     );
   };
 
-  const handleEdit = (scholarship: Scholarship) => {
-    setSelectedScholarship(scholarship);
-    setFormData({
-      scholarshipName: scholarship.title,
-      amount: scholarship.amount?.toString() || '',
-      maxIncome: '',
-      disability: 'no',
-      minPercentage: '',
-      highestQualification: '',
-      category: '',
-      otherRequirements: scholarship.requirements?.join('\n') || '',
-      description: scholarship.description || '',
-      lastDate: scholarship.deadline,
-      duration: '',
-      sahayType: '',
-    });
-    setIsEditing(true);
-    setShowModal(true);
-  };
+    useEffect(() => {
+        const fetchScholarshipDetails = async (id: string) => {
+            try {
+                const response = await axios.get(`http://localhost:5000/api/scholarship/${id}`, { withCredentials: true });
+                const scholarshipData = response.data;
+                setFormData({
+                    scholarshipName: scholarshipData.scholarshipName,
+                    amount: scholarshipData.amount?.toString() || '',
+                    maxIncome: '',
+                    disability: 'no',
+                    minPercentage: '',
+                    highestQualification: '',
+                    category: '',
+                    otherRequirements: scholarshipData.eligibilityRequirements?.join('\n') || '',
+                    description: scholarshipData.description || '',
+                    lastDate: scholarshipData.lastDate,
+                    duration: scholarshipData.duration || '',
+                    sahayType: scholarshipData.sahayType || '',
+                });
+            } catch (error) {
+                console.error("Error fetching scholarship details:", error);
+            }
+        };
+      });
+ 
 
   const handleDelete = (id: number) => {
     if (window.confirm('Are you sure you want to delete this scholarship?')) {
@@ -225,7 +232,7 @@ const ManageScholarships = () => {
           />
           <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
         </div>
-        <select 
+        <select
           className="select select-bordered w-64"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
@@ -254,13 +261,13 @@ const ManageScholarships = () => {
               <tr key={scholarship.id}>
                 <td>{scholarship.title || 'Untitled'}</td>
                 <td>
-                  {typeof scholarship.amount === 'number' 
-                    ? `₹${scholarship.amount.toLocaleString()}` 
+                  {typeof scholarship.amount === 'number'
+                    ? `₹${scholarship.amount.toLocaleString()}`
                     : '₹0'}
                 </td>
                 <td>
-                  {scholarship.deadline 
-                    ? new Date(scholarship.deadline).toLocaleDateString() 
+                  {scholarship.deadline
+                    ? new Date(scholarship.deadline).toLocaleDateString()
                     : 'No deadline'}
                 </td>
                 <td>
@@ -270,14 +277,14 @@ const ManageScholarships = () => {
                 </td>
                 <td>
                   <div className="flex gap-2">
-                    <button 
-                      className="btn btn-ghost btn-sm" 
+                    <button
+                      className="btn btn-ghost btn-sm"
                       onClick={() => handleEdit(scholarship)}
                     >
                       <Edit className="h-4 w-4" />
                     </button>
-                    <button 
-                      className="btn btn-ghost btn-sm text-error" 
+                    <button
+                      className="btn btn-ghost btn-sm text-error"
                       onClick={() => handleDelete(scholarship.id)}
                     >
                       <Trash2 className="h-4 w-4" />

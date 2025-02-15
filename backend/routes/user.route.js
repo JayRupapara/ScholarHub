@@ -1,4 +1,4 @@
-import { signup, login, addDetails,getProfileDetails } from "../controllers/user.controller.js"; // ✅ Named imports
+import { signup, login, addDetails, getProfileDetails, getScholarships, addScholarshipToUser, getSavedScholarships, applyScholarship } from "../controllers/user.controller.js"; // ✅ Named imports
 import authenticateToken from "../middleware/authenticateToken.js";
 import { check } from "express-validator";
 import express from "express";
@@ -41,10 +41,21 @@ router.post(
 );
 
 router.get(
-  "/getProfile", 
+  "/getProfile",
   [
     authenticateToken
   ],
-  getProfileDetails)
+  getProfileDetails
+)
 
+router.get("/getScholarships",
+  authenticateToken,
+  getScholarships
+)
+
+router.post("/addScholarshipToUser", authenticateToken, addScholarshipToUser);
+
+router.get("/savedScholarships", authenticateToken, getSavedScholarships);
+
+router.post("/applyScholarship",authenticateToken,applyScholarship)
 export default router;

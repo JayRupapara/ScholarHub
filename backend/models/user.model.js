@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema(
       {
         documentType: {
           type: String,
+          enum: ["pan", "aadhaar", "10th", "12th"],
+          unique: true,
         },
         documentId: {
           type: String,
@@ -60,7 +62,7 @@ const userSchema = new mongoose.Schema(
     savedScholarships: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Scholarships",
+        ref: "scholarships",
       },
     ],
   },

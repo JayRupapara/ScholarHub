@@ -11,7 +11,9 @@ const OrgDashboard = () => {
   }
   // Sample data
 
-  const [stats, setStats] = useState([[
+  // const [totalApplication, setTotalApplication] = useState(0);
+  // const [activeScholarships, setActiveScholarships] = useState(0);
+  const [stats, setStats] = useState([
     {
       title: "Total Applications",
       value: 0,
@@ -24,28 +26,8 @@ const OrgDashboard = () => {
       icon: Award,
       color: "secondary"
     }
-  ]]);
-  const [recentApplications, setRecentApplications] = useState([{
-    id: 1,
-    studentName: "John Doe",
-    scholarship: "STEM Excellence Scholarship",
-    date: "2024-02-14",
-    status: "pending"
-  },
-  {
-    id: 2,
-    studentName: "Jane Smith",
-    scholarship: "Creative Arts Grant",
-    date: "2024-02-13",
-    status: "approved"
-  },
-  {
-    id: 3,
-    studentName: "Mike Johnson",
-    scholarship: "Future Leaders Fund",
-    date: "2024-02-12",
-    status: "rejected"
-  }]);
+  ]);
+  const [recentApplications, setRecentApplications] = useState([]);
   const [analyticsData, setAnalyticsData] = useState([{ name: 'Jan', applications: 65 },
   { name: 'Feb', applications: 85 },
   { name: 'Mar', applications: 72 },
@@ -57,10 +39,12 @@ const OrgDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         const statsResponse = await axios.get('http://localhost:5000/api/organization/getDashboard', { withCredentials: true });
+        console.log(statsResponse);
         const statsData = statsResponse.data;
-
         setRecentApplications(statsData.recentApplications);
         setAnalyticsData(analyticsData);
+        setActiveScholarships(statsData.activeScholarships)
+        setTotalApplication(statsData.totalApplication);
 
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -77,12 +61,12 @@ const OrgDashboard = () => {
         {stats.map((stat, index) => (
           <div key={index} className="bg-base-100 rounded-xl shadow-sm p-6">
             <div className="flex items-center">
-              <div className={`p-2 rounded-lg bg-${stat[0].color}-200`}>
+              <div className={`p-2 rounded-lg bg-${stat.color}-200`}>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">{stat[0].title}</p>
+                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
                 <div className="flex items-baseline">
-                  <p className="text-2xl font-semibold">{stat[0].value}</p>
+                  <p className="text-2xl font-semibold">{stat.value}</p>
                 </div>
               </div>
             </div>
@@ -99,12 +83,12 @@ const OrgDashboard = () => {
               <button className="btn btn-ghost btn-sm" onClick={handleClick}>View All</button>
             </div>
             <div className="space-y-4">
-              {recentApplications.length === 0 ?
+              {recentApplications && recentApplications.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-gray-500 text-center">No recent applications available</p>
                 </div>
-                :
-                recentApplications.map((application) => (
+              ) : (
+                recentApplications && recentApplications.map((application) => (
                   <div key={application.id} className="flex items-center justify-between p-4 bg-base-200 rounded-lg">
                     <div>
                       <p className="font-medium">{application.studentName}</p>
@@ -120,7 +104,8 @@ const OrgDashboard = () => {
                       </span>
                     </div>
                   </div>
-                ))}
+                ))
+              )}
             </div>
           </div>
         </div>

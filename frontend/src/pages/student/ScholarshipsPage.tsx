@@ -1,24 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, Heart } from 'lucide-react';
-import { scholarships } from '../../data/dummyData';
 import AnimatedScholarshipCard from '../../components/student/AnimatedScholarshipCard';
 import ApplicationModal from '../../components/common/ApplicationModal';
-import AlertMessage from '../../components/common/AlertMessage';
 import { useToast } from '../../hooks/useToast';
-
-interface Scholarship {
-  id: number;
-  title: string;
-  amount: number;
-  deadline: string;
-  description: string;
-  requirements: string[];
-  eligibility: {
-    maxIncome?: number;
-    caste?: string[];
-    minGPA?: number;
-  };
-}
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 interface ApplicationFormData {
   fullName: string;
@@ -33,6 +19,23 @@ interface ApplicationFormData {
   }[];
 }
 
+interface Scholarship {
+  _id: string;
+  scholarshipName: string;
+  Amount: number;
+  PaymentMethods: string;
+  duration: string;
+  eligibilityRequirements: {
+    academic: any; // Define this based on your actual data structure
+    maxIncome: number;
+    disability: boolean;
+    category: string[];
+    otherRequirements: string;
+  };
+  lastDate: string;
+  sahayType: string;
+}
+
 const ScholarshipsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -45,7 +48,7 @@ const ScholarshipsPage = () => {
     caste: '',
   });
   const { showToast } = useToast();
-  const [savedScholarships, setSavedScholarships] = useState<number[]>([]);
+  const [savedScholarships, setSavedScholarships] = useState<string[]>([]);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [applicationData, setApplicationData] = useState<ApplicationFormData>({
     fullName: '',
@@ -62,13 +65,30 @@ const ScholarshipsPage = () => {
       { name: 'Aadhar Card', isSelected: false }
     ]
   });
+  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/users/getScholarships?page=${currentPage}`, { withCredentials: true });
+        setScholarships(response.data.scholarships); // Assuming the response contains an object with scholarships
+        setTotalPages(response.data.totalPages); // Assuming the response contains total pages
+      } catch (error) {
+        console.error('Error fetching scholarships:', error);
+      }
+    };
+
+    fetchScholarships();
+  }, [currentPage]);
 
   const handleApply = (scholarship: Scholarship) => {
     setSelectedScholarship(scholarship);
     setShowModal(true);
   };
 
-  const handleSaveScholarship = (scholarshipId: number) => {
+  const handleSaveScholarship = (scholarshipId: string) => {
     if (savedScholarships.includes(scholarshipId)) {
       setSavedScholarships(prev => prev.filter(id => id !== scholarshipId));
       showToast('Scholarship removed from saved', 'info');
@@ -78,8 +98,7 @@ const ScholarshipsPage = () => {
     }
   };
 
-  const handleStartApplication = (scholarship: Scholarship) => {
-    // Initialize required documents based on scholarship
+  const handleStartApplication = (p0: Scholarship) => {
     const requiredDocs = [
       { name: '10th Marksheet', isSelected: false },
       { name: '12th Marksheet', isSelected: false },
@@ -97,8 +116,22 @@ const ScholarshipsPage = () => {
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the application data to your backend
-    console.log('Submitting application:', applicationData);
+    const selectedDocuments = applicationData.documents.filter(doc => doc.isSelected).map(doc => doc.name);
+    // console.log('Submitting application:', { ...applicationData, documents: selectedDocuments });
+    try {
+      const response = await axios.post('http://localhost:5000/api/users/applyScholarship', {
+        scholarshipId: selectedScholarship?._id,
+        documents: selectedDocuments
+      }, { withCredentials: true });
+
+      if(response.data.success) {
+        setShowApplicationModal(false);
+        showToast("Applied successfully");
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      showToast('Failed to submit application. Please try again.', 'error');
+    }
     setShowApplicationModal(false);
     showToast('Application submitted successfully!', 'success');
   };
@@ -137,6 +170,39 @@ const ScholarshipsPage = () => {
     { label: 'ST', value: 'st' },
     { label: 'EWS', value: 'ews' }
   ];
+
+  // Function to filter scholarships based on search query and filters
+  const filteredScholarships = scholarships.filter((scholarship) => {
+    const matchesSearchQuery = scholarship.scholarshipName
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const matchesAmountFilter = filters.amount
+      ? scholarship.Amount >= parseInt(filters.amount.split('-')[0]) &&
+      (filters.amount.split('-')[1] === 'above' || scholarship.Amount <= parseInt(filters.amount.split('-')[1]))
+      : true;
+
+    const matchesDeadlineFilter = filters.deadline
+      ? new Date(scholarship.lastDate) <= new Date(Date.now() + parseInt(filters.deadline) * 24 * 60 * 60 * 1000)
+      : true;
+
+    const matchesIncomeFilter = filters.income
+      ? scholarship.eligibilityRequirements.maxIncome >= parseInt(filters.income.split('-')[0]) &&
+      (filters.income.split('-')[1] === 'above' || scholarship.eligibilityRequirements.maxIncome <= parseInt(filters.income.split('-')[1]))
+      : true;
+
+    const matchesCasteFilter = filters.caste
+      ? scholarship.eligibilityRequirements.category.includes(filters.caste)
+      : true;
+
+    return (
+      matchesSearchQuery &&
+      matchesAmountFilter &&
+      matchesDeadlineFilter &&
+      matchesIncomeFilter &&
+      matchesCasteFilter
+    );
+  });
 
   return (
     <div className="p-6">
@@ -243,83 +309,83 @@ const ScholarshipsPage = () => {
 
       {/* Scholarship Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {scholarships.map((scholarship) => (
-          <AnimatedScholarshipCard
-            key={scholarship.id}
-            {...scholarship}
-            onApply={() => handleApply(scholarship)}
-          />
+        {filteredScholarships.map((scholarship) => (
+          <><AnimatedScholarshipCard
+            key={scholarship._id}
+            title={scholarship.scholarshipName}
+            amount={scholarship.Amount}
+            deadline={new Date(scholarship.lastDate).toLocaleDateString()}
+            onApply={async () => {
+              await axios.post('http://localhost:5000/api/users/addScholarshipToUser', { scholarshipId: scholarship._id }, { withCredentials: true });
+              handleApply(scholarship);
+            }}
+            description={''}
+            requirements={scholarship.eligibilityRequirements}
+          /><ApplicationModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            title={selectedScholarship?.scholarshipName || ''}
+          >
+              <div className="space-y-4">
+                <p>Amount: ₹{selectedScholarship?.Amount}</p>
+                <p>Payment Methods: {selectedScholarship?.PaymentMethods}</p>
+                <p>Duration: {selectedScholarship?.duration}</p>
+                <p>Sahay Type: {selectedScholarship?.sahayType}</p>
+
+                <div className="divider">Eligibility Requirements</div>
+                <ul className="list-disc list-inside">
+                  <li>Max Income: ₹{selectedScholarship?.eligibilityRequirements.maxIncome}</li>
+                  <li>Disability: {selectedScholarship?.eligibilityRequirements.disability ? 'Yes' : 'No'}</li>
+                  <li>Categories: {selectedScholarship?.eligibilityRequirements.category.join(', ')}</li>
+                  <li>Other: {selectedScholarship?.eligibilityRequirements.otherRequirements}</li>
+                </ul>
+
+                {/* Save and Apply Buttons */}
+                <div className="mt-6 flex justify-between items-center">
+                  <button
+                    className={`btn hover:bg-primary hover:text-white group ${savedScholarships.includes(selectedScholarship?._id || '')
+                      ? 'btn-primary text-white'
+                      : 'btn-outline text-primary hover:border-primary'} gap-2`}
+                    onClick={() => selectedScholarship && handleSaveScholarship(selectedScholarship._id)}
+                  >
+                    <Heart
+                      className={`h-5 w-5 ${savedScholarships.includes(selectedScholarship?._id || '')
+                        ? 'fill-white'
+                        : 'fill-none stroke-primary group-hover:stroke-white'}`} />
+                    {savedScholarships.includes(selectedScholarship?._id || '')
+                      ? 'Saved'
+                      : 'Save Scholarship'}
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleStartApplication(selectedScholarship!)}
+                  >
+                    Start Application
+                  </button>
+                </div>
+              </div>
+            </ApplicationModal></>
         ))}
       </div>
 
-      {/* Application Modal */}
-      <ApplicationModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={selectedScholarship?.title || ''}
-      >
-        <div className="space-y-4">
-          <p>{selectedScholarship?.description}</p>
-
-          <div className="divider">Requirements</div>
-          <ul className="list-disc list-inside">
-            {selectedScholarship?.requirements?.map((req, idx) => (
-              <li key={idx}>{req}</li>
-            ))}
-          </ul>
-
-          <div className="divider">Eligibility</div>
-          <div className="grid grid-cols-2 gap-4">
-            {selectedScholarship?.eligibility?.maxIncome && (
-              <div>
-                <span className="text-sm font-medium">Maximum Family Income:</span>
-                <p>₹{selectedScholarship.eligibility.maxIncome.toLocaleString()}</p>
-              </div>
-            )}
-            {selectedScholarship?.eligibility?.minGPA && (
-              <div>
-                <span className="text-sm font-medium">Minimum GPA:</span>
-                <p>{selectedScholarship.eligibility.minGPA}</p>
-              </div>
-            )}
-            {selectedScholarship?.eligibility?.caste && (
-              <div>
-                <span className="text-sm font-medium">Eligible Categories:</span>
-                <p>{selectedScholarship.eligibility.caste.join(', ')}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Save and Apply Buttons */}
-          <div className="mt-6 flex justify-between items-center">
-            <button 
-              className={`btn hover:bg-primary hover:text-white group ${
-                savedScholarships.includes(selectedScholarship?.id || 0) 
-                  ? 'btn-primary text-white' 
-                  : 'btn-outline text-primary hover:border-primary'
-              } gap-2`}
-              onClick={() => selectedScholarship && handleSaveScholarship(selectedScholarship.id)}
-            >
-              <Heart 
-                className={`h-5 w-5 ${
-                  savedScholarships.includes(selectedScholarship?.id || 0) 
-                    ? 'fill-white' 
-                    : 'fill-none stroke-primary group-hover:stroke-white'
-                }`}
-              />
-              {savedScholarships.includes(selectedScholarship?.id || 0) 
-                ? 'Saved' 
-                : 'Save Scholarship'}
-            </button>
-            <button 
-              className="btn btn-primary"
-              onClick={() => handleStartApplication(selectedScholarship!)}
-            >
-              Start Application
-            </button>
-          </div>
-        </div>
-      </ApplicationModal>
+      {/* Pagination Buttons */}
+      <div className="flex justify-center mt-6">
+        <button
+          className="btn btn-outline mr-2"
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+        <span className="self-center">Page {currentPage} of {totalPages}</span>
+        <button
+          className="btn btn-outline ml-2"
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
 
       {/* Application Form Modal */}
       <ApplicationModal
@@ -464,7 +530,6 @@ const ScholarshipsPage = () => {
                           documents: newDocs
                         }));
                       }}
-                      required
                     />
                   </label>
                 </div>

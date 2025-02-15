@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Users, Award } from 'lucide-react';
+import { Calendar, Users, Award } from 'lucide-react';
 
 const SCHOLARSHIP_IMAGES = {
   stem: "https://images.unsplash.com/photo-1580894894513-541e068a3e2b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80", // Lab/science image
@@ -26,15 +25,21 @@ const HomePage = () => {
               their perfect scholarship match.
             </p>
             <div className="flex gap-4 justify-center">
-              <Link to="/scholarships" className="btn bg-primary text-neutral hover:bg-accent">
-                Find Scholarships <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              <Link to="/signup" className="btn bg-neutral text-primary hover:bg-secondary">
-                  Create Account
-                </Link>
-              </div>
+              <Link 
+                to="/signin" 
+                className="btn bg-primary text-neutral hover:bg-accent w-36"
+              >
+                Sign In
+              </Link>
+              <Link 
+                to="/signup" 
+                className="btn bg-neutral text-primary hover:bg-secondary w-36"
+              >
+                Create Account
+              </Link>
             </div>
           </div>
+        </div>
       </div>
 
       {/* Featured Scholarships */}
@@ -158,13 +163,24 @@ const HomePage = () => {
           <p className="mb-8 max-w-2xl mx-auto">
             Join thousands of students who have already found their perfect scholarship match.
           </p>
-          <Link to="/signup" className="btn btn-lg bg-white text-primary hover:bg-white/90">
-            Get Started Now
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link 
+              to="/signin/student" 
+              className="btn btn-lg bg-white text-primary hover:bg-white/90 w-40"
+            >
+              Sign In Now
+            </Link>
+            <Link 
+              to="/signup/student" 
+              className="btn btn-lg bg-neutral text-primary hover:bg-neutral/90 w-40"
+            >
+              Create Account
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default HomePage; 
+export default HomePage;
