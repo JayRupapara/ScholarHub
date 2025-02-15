@@ -237,21 +237,7 @@ const Applications = () => {
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
-        <div className="text-sm text-gray-500">
-          Showing {filteredApplications.length} of {applications.length} applications
-        </div>
-        <div className="join">
-          <button className="join-item btn btn-sm">Previous</button>
-          <button className="join-item btn btn-sm btn-active">1</button>
-          <button className="join-item btn btn-sm">2</button>
-          <button className="join-item btn btn-sm">3</button>
-          <button className="join-item btn btn-sm">Next</button>
-        </div>
-      </div>
-
-      {/* View Details Modal */}
+      {/* Application Details Modal */}
       <ApplicationModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
