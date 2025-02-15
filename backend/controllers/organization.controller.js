@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import Organization from '../models/organization.model.js';
 import OrganizationScholarship from "../models/organizationScholarship.model.js";
+import UserScholarship from "../models/userScholarship.model.js"
 import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
@@ -89,3 +90,65 @@ export const addsScholarship = async (req, res) => {
         return res.status(500).json({ message: 'Error adding scholarship to organization: ' + error.message });
     }
 }
+
+
+export const getScholarshipDashboard = async (req, res) => {
+    const organizationID = req.user.id;
+    try {
+        // 1. Total Applications and Percentage Change
+        const totalApplications = await UserScholarship.countDocuments({ organizationID });
+
+        const oneMonthsAgo = new Date(new Date().setMonth(new Date().getMonth() - 1));
+        const previousApplications = await UserScholarship.countDocuments({
+            organizationID,
+            createdAt: { $lte: oneMonthsAgo }
+        });
+
+
+        // 2. Active Scholarships
+        const activeScholarships = await OrganizationScholarship.countDocuments({
+            organizationID,
+            status: "active"
+        });
+
+        // 3. Recent Applications
+        const recentApplications = await UserScholarship.find({ organizationID })
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .populate("userID", "name") // Assuming you have a userID field that references User collection
+            .populate("scholarshipID", "name")
+            .select("status createdAt");
+
+        // 4. Application Trends for Last 6 Months
+        const applicationTrends = await UserScholarship.aggregate([
+            {
+                $match: {
+                    organizationID: organizationID,
+                    createdAt: { $gte: oneMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: "$createdAt" },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { "_id": 1 } }
+        ]);
+
+        const trendsData = Array.from({ length: 6 }, (_, i) => {
+            const month = new Date().getMonth() - 5 + i;
+            const data = applicationTrends.find(t => t._id === (month > 0 ? month : 12 + month));
+            return data ? data.count : 0;
+        });
+
+        return res.status(200).json({
+            totalApplications,
+            activeScholarships,
+            recentApplications,
+            applicationTrends: trendsData
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Error fetching dashboard data: " + error.message });
+    }
+};
