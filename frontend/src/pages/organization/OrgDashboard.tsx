@@ -1,5 +1,4 @@
-import React from 'react';
-import { Users, Award, BarChart2 } from 'lucide-react';
+import { Users, Award, BarChart2, } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const OrgDashboard = () => {

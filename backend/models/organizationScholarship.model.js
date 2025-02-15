@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 const organizationScholarshipSchema = new mongoose.Schema({
     organizationID: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Organization',
+        ref: 'organization',
         required: true,
     },
     scholarshipID: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Scholarship',
+        ref: 'scholarships',
         required: true,
     },
     status: {
@@ -19,4 +19,4 @@ const organizationScholarshipSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-export default mongoose.model("OrganizationScholarship", organizationScholarshipSchema);
+export default mongoose.model("organizationscholarships", organizationScholarshipSchema);

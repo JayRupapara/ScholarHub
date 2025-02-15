@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import Organization from '../models/organization.model.js';
+import OrganizationScholarship from "../models/organizationScholarship.model.js";
 import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
@@ -38,7 +39,7 @@ export const login = async (req, res) => {
         res.cookie("accessToken", accessToken, { httpOnly: true });
         return res.status(200).json({ message: 'Login successful' });
     } catch (error) {
-        return res.status(500).json({ message: 'Error logging in'+error });
+        return res.status(500).json({ message: 'Error logging in' + error });
     }
 }
 
@@ -52,5 +53,39 @@ export const getOrganizationDetails = async (req, res) => {
         return res.status(200).json(organization);
     } catch (error) {
         return res.json({ message: 'Error retrieving organization details' }).status(500);
+    }
+}
+
+export const getScholarship = async (req, res) => {
+    const id = req.user.id;
+    try {
+        const scholarships = await OrganizationScholarship.find({ organizationID: id }).populate('scholarshipID');
+        if (!scholarships || scholarships.length === 0) {
+            return res.status(200).json({ message: 'No scholarships found for this organization', scholarships: [] });
+        }
+        return res.status(200).json(scholarships);
+    } catch (error) {
+        return res.status(500).json({ message: 'Error retrieving scholarships: ' + error.message });
+    }
+}
+
+export const addsScholarship = async (req, res) => {
+    const organizationID = req.user.id;
+    const { scholarshipID } = req.body;
+
+    if (!scholarshipID) {
+        return res.status(400).json({ message: 'Scholarship ID is required' });
+    }
+
+    try {
+        const newOrganizationScholarship = new OrganizationScholarship({
+            organizationID,
+            scholarshipID,
+        });
+
+        await newOrganizationScholarship.save();
+        return res.status(201).json({ message: 'Scholarship added to organization successfully', scholarship: newOrganizationScholarship });
+    } catch (error) {
+        return res.status(500).json({ message: 'Error adding scholarship to organization: ' + error.message });
     }
 }

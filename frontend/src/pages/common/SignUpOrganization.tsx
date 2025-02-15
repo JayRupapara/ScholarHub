@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Building2, Mail, Lock, Phone } from 'lucide-react';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 const SignUpOrganization = () => {
   const navigate = useNavigate();
@@ -12,16 +14,22 @@ const SignUpOrganization = () => {
     confirmPassword: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userType', 'organization');
-    localStorage.setItem('userEmail', formData.email);
-    navigate('/organization/dashboard');
+    const response = await axios.post("http://localhost:5000/api/organization/signup", formData);
+    if (response.data.message === "Organization signed up successfully") {
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userType', 'organization');
+      localStorage.setItem('userEmail', formData.email);
+      navigate("/signin/organization");
+    } else {
+      toast.error(response.data.message);
+    }
   };
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center py-8">
+      <ToastContainer />
       <div className="max-w-4xl w-full px-6">
         <div className="text-center mb-8">
           <Building2 className="w-12 h-12 mx-auto text-primary mb-4" />
@@ -45,7 +53,7 @@ const SignUpOrganization = () => {
                       placeholder="Enter organization name"
                       className="input input-bordered flex-1"
                       value={formData.organizationName}
-                      onChange={(e) => setFormData({...formData, organizationName: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
                       required
                     />
                   </div>
@@ -61,7 +69,7 @@ const SignUpOrganization = () => {
                       placeholder="organization@example.com"
                       className="input input-bordered flex-1"
                       value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
                     />
                   </div>
@@ -77,7 +85,7 @@ const SignUpOrganization = () => {
                       placeholder="Enter phone number"
                       className="input input-bordered flex-1"
                       value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       required
                     />
                   </div>
@@ -93,7 +101,7 @@ const SignUpOrganization = () => {
                       placeholder="Create a password"
                       className="input input-bordered flex-1"
                       value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       required
                     />
                   </div>
@@ -109,7 +117,7 @@ const SignUpOrganization = () => {
                       placeholder="Confirm your password"
                       className="input input-bordered flex-1"
                       value={formData.confirmPassword}
-                      onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       required
                     />
                   </div>

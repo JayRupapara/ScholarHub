@@ -58,4 +58,4 @@ const scholarshipSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("scholarship", scholarshipSchema);
+export default mongoose.model("scholarships", scholarshipSchema);

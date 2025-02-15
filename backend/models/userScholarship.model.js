@@ -8,7 +8,7 @@ const userScholarshipSchema = new mongoose.Schema({
     },
     scholarshipID: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Scholarship',
+        ref: 'scholarships',
         required: true,
     },
     status:{
@@ -18,4 +18,4 @@ const userScholarshipSchema = new mongoose.Schema({
     timestamps: true
 })
 
-export default mongoose.model("userscholarship", scholarshipSchema);
+export default mongoose.model("userscholarship", userScholarshipSchema);
