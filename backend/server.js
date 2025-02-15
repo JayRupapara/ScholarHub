@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.route.js";
 import organizationRoutes from "./routes/organization.route.js";
 import cookieParser from "cookie-parser";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
+import aadhaarRoutes from "./routes/aadhar.routes.js";
 app.use(express.json());
 
 import cors from "cors";
@@ -23,6 +24,7 @@ app.use(
 app.use("/api/users", userRoutes);
 app.use("/api/organization", organizationRoutes);
 app.use("/api/scholarship", scholarshipRoutes);
+app.use("/api/aadharVerify", aadhaarRoutes);
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
