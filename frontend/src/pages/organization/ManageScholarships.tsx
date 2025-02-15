@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import ApplicationModal from '../../components/common/ApplicationModal';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Scholarship {
+  scholarshipID: any;
   id: number;
   title: string;
   amount: number;
@@ -25,7 +29,7 @@ interface DocumentRequirement {
 const ManageScholarships = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedScholarship, setSelectedScholarship] = useState<Scholarship | null>(null);
+  const [, setSelectedScholarship] = useState<Scholarship | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     scholarshipName: '',
@@ -52,43 +56,20 @@ const ManageScholarships = () => {
     { id: 'pan', name: 'PAN Card', required: false },
     { id: 'other', name: 'Other Documents', required: false, otherDetails: [] }
   ]);
+  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
 
-  // Sample scholarships data
-  const scholarships: Scholarship[] = [
-    {
-      id: 1,
-      title: "STEM Excellence Scholarship",
-      amount: 10000,
-      deadline: "2024-05-15",
-      applicants: 45,
-      status: "active",
-      field: "Engineering",
-      description: "A scholarship for students in the field of engineering",
-      requirements: ["GPA of 3.5 or higher", "Relevant engineering coursework"]
-    },
-    {
-      id: 2,
-      title: "Creative Arts Grant",
-      amount: 7500,
-      deadline: "2024-05-30",
-      applicants: 28,
-      status: "active",
-      field: "Arts",
-      description: "A scholarship for students in the field of arts",
-      requirements: ["Portfolio submission", "Art history coursework"]
-    },
-    {
-      id: 3,
-      title: "Future Leaders Fund",
-      amount: 15000,
-      deadline: "2024-06-01",
-      applicants: 0,
-      status: "draft",
-      field: "Business",
-      description: "A scholarship for students in the field of business",
-      requirements: ["Business administration coursework", "Leadership experience"]
-    }
-  ];
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/organization/getScholarships', { withCredentials: true }); // Adjust the URL as needed
+        setScholarships(response.data);
+      } catch (error) {
+        toast.error('Failed to fetch scholarships. Please try again later.' + error);
+      }
+    };
+
+    fetchScholarships();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -134,49 +115,49 @@ const ManageScholarships = () => {
   };
 
   const handleDocumentChange = (id: string, checked: boolean) => {
-    setDocumentRequirements(prev => 
-      prev.map(doc => 
+    setDocumentRequirements(prev =>
+      prev.map(doc =>
         doc.id === id ? { ...doc, required: checked } : doc
       )
     );
   };
 
   const handleOtherDetailsChange = (index: number, value: string) => {
-    setDocumentRequirements(prev => 
-      prev.map(doc => 
-        doc.id === 'other' 
-          ? { 
-              ...doc, 
-              otherDetails: doc.otherDetails?.map((detail, i) => 
-                i === index ? value : detail
-              ) || []
-            } 
+    setDocumentRequirements(prev =>
+      prev.map(doc =>
+        doc.id === 'other'
+          ? {
+            ...doc,
+            otherDetails: doc.otherDetails?.map((detail, i) =>
+              i === index ? value : detail
+            ) || []
+          }
           : doc
       )
     );
   };
 
   const handleAddOtherDocument = () => {
-    setDocumentRequirements(prev => 
-      prev.map(doc => 
-        doc.id === 'other' 
-          ? { 
-              ...doc, 
-              otherDetails: [...(doc.otherDetails || []), '']
-            } 
+    setDocumentRequirements(prev =>
+      prev.map(doc =>
+        doc.id === 'other'
+          ? {
+            ...doc,
+            otherDetails: [...(doc.otherDetails || []), '']
+          }
           : doc
       )
     );
   };
 
   const handleRemoveOtherDocument = (index: number) => {
-    setDocumentRequirements(prev => 
-      prev.map(doc => 
-        doc.id === 'other' 
-          ? { 
-              ...doc, 
-              otherDetails: doc.otherDetails?.filter((_, i) => i !== index) || []
-            } 
+    setDocumentRequirements(prev =>
+      prev.map(doc =>
+        doc.id === 'other'
+          ? {
+            ...doc,
+            otherDetails: doc.otherDetails?.filter((_, i) => i !== index) || []
+          }
           : doc
       )
     );
@@ -211,9 +192,10 @@ const ManageScholarships = () => {
 
   return (
     <div className="p-6">
+      <ToastContainer />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Manage Scholarships</h1>
-        <button 
+        <button
           onClick={() => setShowModal(true)}
           className="btn btn-primary gap-2"
         >
@@ -233,7 +215,7 @@ const ManageScholarships = () => {
           <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
         </div>
 
-        <select 
+        <select
           className="select select-bordered w-full"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
@@ -253,20 +235,20 @@ const ManageScholarships = () => {
               <th>Title</th>
               <th>Amount</th>
               <th>Deadline</th>
-              <th>Field</th>
-              <th>Applicants</th>
+              {/* <th>Field</th>
+              <th>Applicants</th> */}
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredScholarships.map((scholarship) => (
+            {Array.isArray(filteredScholarships) && filteredScholarships.map((scholarship) => (
               <tr key={scholarship.id}>
-                <td>{scholarship.title}</td>
-                <td>${scholarship.amount.toLocaleString()}</td>
-                <td>{new Date(scholarship.deadline).toLocaleDateString()}</td>
-                <td>{scholarship.field}</td>
-                <td>{scholarship.applicants}</td>
+                <td>{scholarship.scholarshipID.scholarshipName}</td>
+                <td>{scholarship.scholarshipID.Amount}</td>
+                <td>{new Date(scholarship.scholarshipID.lastDate).toLocaleDateString()}</td>
+                {/* <td>{scholarship.field}</td>
+                <td>{scholarship.applicants}</td> */}
                 <td>
                   <span className={`badge badge-${getStatusColor(scholarship.status)} badge-sm`}>
                     {scholarship.status}
@@ -274,14 +256,14 @@ const ManageScholarships = () => {
                 </td>
                 <td>
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       className="btn btn-ghost btn-sm"
                       onClick={() => handleEdit(scholarship)}
                       title="Edit"
                     >
                       <Edit className="h-4 w-4 text-primary" />
                     </button>
-                    <button 
+                    <button
                       className="btn btn-ghost btn-sm"
                       onClick={() => handleDelete(scholarship.id)}
                       title="Delete"
@@ -344,7 +326,7 @@ const ManageScholarships = () => {
                   type="text"
                   className="input input-bordered input-sm w-full"
                   value={formData.scholarshipName}
-                  onChange={(e) => setFormData({...formData, scholarshipName: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, scholarshipName: e.target.value })}
                   required
                 />
               </div>
@@ -354,7 +336,7 @@ const ManageScholarships = () => {
                   type="number"
                   className="input input-bordered input-sm w-full"
                   value={formData.amount}
-                  onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   required
                 />
               </div>
@@ -368,7 +350,7 @@ const ManageScholarships = () => {
                   type="number"
                   className="input input-bordered input-sm w-full"
                   value={formData.maxIncome}
-                  onChange={(e) => setFormData({...formData, maxIncome: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, maxIncome: e.target.value })}
                   required
                 />
               </div>
@@ -378,7 +360,7 @@ const ManageScholarships = () => {
                   type="number"
                   className="input input-bordered input-sm w-full"
                   value={formData.minPercentage}
-                  onChange={(e) => setFormData({...formData, minPercentage: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, minPercentage: e.target.value })}
                   required
                 />
               </div>
@@ -391,7 +373,7 @@ const ManageScholarships = () => {
                 <select
                   className="select select-bordered select-sm w-full"
                   value={formData.highestQualification}
-                  onChange={(e) => setFormData({...formData, highestQualification: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, highestQualification: e.target.value })}
                   required
                 >
                   <option value="">Select</option>
@@ -406,7 +388,7 @@ const ManageScholarships = () => {
                 <select
                   className="select select-bordered select-sm w-full"
                   value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   required
                 >
                   <option value="">Select</option>
@@ -423,7 +405,7 @@ const ManageScholarships = () => {
                 <select
                   className="select select-bordered select-sm w-full"
                   value={formData.disability}
-                  onChange={(e) => setFormData({...formData, disability: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, disability: e.target.value })}
                   required
                 >
                   <option value="no">No</option>
@@ -439,7 +421,7 @@ const ManageScholarships = () => {
                 <select
                   className="select select-bordered select-sm w-full"
                   value={formData.duration}
-                  onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                   required
                 >
                   <option value="">Select</option>
@@ -452,7 +434,7 @@ const ManageScholarships = () => {
                 <select
                   className="select select-bordered select-sm w-full"
                   value={formData.sahayType}
-                  onChange={(e) => setFormData({...formData, sahayType: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, sahayType: e.target.value })}
                   required
                 >
                   <option value="">Select</option>
@@ -466,7 +448,7 @@ const ManageScholarships = () => {
                   type="date"
                   className="input input-bordered input-sm w-full"
                   value={formData.lastDate}
-                  onChange={(e) => setFormData({...formData, lastDate: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, lastDate: e.target.value })}
                   required
                 />
               </div>
@@ -478,7 +460,7 @@ const ManageScholarships = () => {
               <textarea
                 className="textarea textarea-bordered w-full h-16 text-sm"
                 value={formData.otherRequirements}
-                onChange={(e) => setFormData({...formData, otherRequirements: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, otherRequirements: e.target.value })}
                 placeholder="Enter any additional requirements"
               />
             </div>
@@ -509,7 +491,7 @@ const ManageScholarships = () => {
           <p className="text-sm text-gray-600 mb-4">
             Select the documents that students need to upload for this scholarship:
           </p>
-          
+
           <div className="grid grid-cols-2 gap-4 mb-6">
             {documentRequirements.map(doc => (
               <div key={doc.id} className="flex flex-col">
