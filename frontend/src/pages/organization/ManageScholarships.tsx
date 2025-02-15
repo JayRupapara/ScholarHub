@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import ApplicationModal from '../../components/common/ApplicationModal';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface Scholarship {
-  scholarshipID: any;
   id: number;
   title: string;
-  amount: number;
+  amount: number | null;
   deadline: string;
-  applicants: number;
   status: 'active' | 'draft' | 'closed';
-  field: string;
   description: string;
   requirements: string[];
 }
@@ -23,7 +20,7 @@ interface DocumentRequirement {
   id: string;
   name: string;
   required: boolean;
-  otherDetails?: string[];
+  otherDetails?: string;
 }
 
 const ManageScholarships = () => {
@@ -61,10 +58,21 @@ const ManageScholarships = () => {
   useEffect(() => {
     const fetchScholarships = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/organization/getScholarships', { withCredentials: true }); // Adjust the URL as needed
-        setScholarships(response.data);
+        const response = await axios.get('http://localhost:5000/api/organization/getScholarships', { withCredentials: true });
+        // Transform the data to ensure all required fields exist
+        const transformedData = response.data.map((scholarship: any) => ({
+          id: scholarship.id,
+          title: scholarship.title || 'Untitled',
+          amount: scholarship.amount || 0,
+          deadline: scholarship.deadline || new Date().toISOString(),
+          status: scholarship.status || 'draft',
+          description: scholarship.description || '',
+          requirements: scholarship.requirements || []
+        }));
+        setScholarships(transformedData);
       } catch (error) {
-        toast.error('Failed to fetch scholarships. Please try again later.' + error);
+        toast.error('Failed to fetch scholarships. Please try again later.');
+        console.error(error);
       }
     };
 
@@ -167,7 +175,7 @@ const ManageScholarships = () => {
     setSelectedScholarship(scholarship);
     setFormData({
       scholarshipName: scholarship.title,
-      amount: scholarship.amount.toString(),
+      amount: scholarship.amount?.toString() || '',
       maxIncome: '',
       disability: 'no',
       minPercentage: '',
@@ -193,30 +201,32 @@ const ManageScholarships = () => {
   return (
     <div className="p-6">
       <ToastContainer />
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Manage Scholarships</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Manage Scholarships</h1>
         <button
-          onClick={() => setShowModal(true)}
-          className="btn btn-primary gap-2"
+          className="btn btn-primary"
+          onClick={() => {
+            setIsEditing(false);
+            setShowModal(true);
+          }}
         >
           <Plus className="h-4 w-4" />
           Create New
         </button>
       </div>
 
-      {/* Filters and Search */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="relative">
+      {/* Search and Filter */}
+      <div className="flex gap-4 mb-6">
+        <div className="relative flex-1 max-w-md">
           <input
             type="text"
             placeholder="Search scholarships..."
-            className="input input-bordered w-full"
+            className="input input-bordered w-full pr-10"
           />
           <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
         </div>
-
-        <select
-          className="select select-bordered w-full"
+        <select 
+          className="select select-bordered w-64"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
@@ -235,40 +245,42 @@ const ManageScholarships = () => {
               <th>Title</th>
               <th>Amount</th>
               <th>Deadline</th>
-              {/* <th>Field</th>
-              <th>Applicants</th> */}
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(filteredScholarships) && filteredScholarships.map((scholarship) => (
+            {filteredScholarships.map((scholarship) => (
               <tr key={scholarship.id}>
-                <td>{scholarship.scholarshipID.scholarshipName}</td>
-                <td>{scholarship.scholarshipID.Amount}</td>
-                <td>{new Date(scholarship.scholarshipID.lastDate).toLocaleDateString()}</td>
-                {/* <td>{scholarship.field}</td>
-                <td>{scholarship.applicants}</td> */}
+                <td>{scholarship.title || 'Untitled'}</td>
                 <td>
-                  <span className={`badge badge-${getStatusColor(scholarship.status)} badge-sm`}>
-                    {scholarship.status}
+                  {typeof scholarship.amount === 'number' 
+                    ? `₹${scholarship.amount.toLocaleString()}` 
+                    : '₹0'}
+                </td>
+                <td>
+                  {scholarship.deadline 
+                    ? new Date(scholarship.deadline).toLocaleDateString() 
+                    : 'No deadline'}
+                </td>
+                <td>
+                  <span className={`badge badge-${getStatusColor(scholarship.status || 'draft')}`}>
+                    {scholarship.status || 'draft'}
                   </span>
                 </td>
                 <td>
                   <div className="flex gap-2">
-                    <button
-                      className="btn btn-ghost btn-sm"
+                    <button 
+                      className="btn btn-ghost btn-sm" 
                       onClick={() => handleEdit(scholarship)}
-                      title="Edit"
                     >
-                      <Edit className="h-4 w-4 text-primary" />
+                      <Edit className="h-4 w-4" />
                     </button>
-                    <button
-                      className="btn btn-ghost btn-sm"
+                    <button 
+                      className="btn btn-ghost btn-sm text-error" 
                       onClick={() => handleDelete(scholarship.id)}
-                      title="Delete"
                     >
-                      <Trash2 className="h-4 w-4 text-error" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </td>
@@ -278,43 +290,11 @@ const ManageScholarships = () => {
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
-        <div className="text-sm text-gray-500">
-          Showing {filteredScholarships.length} of {scholarships.length} scholarships
-        </div>
-        <div className="join">
-          <button className="join-item btn btn-sm">Previous</button>
-          <button className="join-item btn btn-sm btn-active">1</button>
-          <button className="join-item btn btn-sm">2</button>
-          <button className="join-item btn btn-sm">3</button>
-          <button className="join-item btn btn-sm">Next</button>
-        </div>
-      </div>
-
       {/* Create/Edit Scholarship Modal */}
       <ApplicationModal
         isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setIsEditing(false);
-          setSelectedScholarship(null);
-          setFormData({
-            scholarshipName: '',
-            amount: '',
-            maxIncome: '',
-            disability: 'no',
-            minPercentage: '',
-            highestQualification: '',
-            category: '',
-            otherRequirements: '',
-            description: '',
-            lastDate: '',
-            duration: '',
-            sahayType: '',
-          });
-        }}
-        title={isEditing ? 'Edit Scholarship' : 'Create New Scholarship'}
+        onClose={() => setShowModal(false)}
+        title={isEditing ? "Edit Scholarship" : "Create New Scholarship"}
       >
         <form onSubmit={handleCreateOrUpdate} className="space-y-4">
           <div className="space-y-4">

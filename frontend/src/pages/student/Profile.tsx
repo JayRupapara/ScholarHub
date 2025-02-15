@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
-import { Mail, Phone, DollarSign, Calendar } from 'lucide-react';
+import { Mail, Phone, DollarSign, Calendar, Upload } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import ApplicationModal from '../../components/common/ApplicationModal';
 
 // interface BankDetails {
 //   accountNumber: string;
@@ -32,6 +34,13 @@ interface ProfileData {
   disability: 'yes' | 'no';
 }
 
+interface DocumentUpload {
+  type: 'aadhar' | 'pan' | 'income' | 'caste' | '10th' | '12th';
+  file: File | null;
+  status: 'pending' | 'verified' | 'rejected';
+  aadharNumber?: string;
+}
+
 const Profile = () => {
   const [profileData, setProfileData] = useState<ProfileData>({
     fullName: '',
@@ -54,6 +63,16 @@ const Profile = () => {
     disability: 'no'
   });
 
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [documents, setDocuments] = useState<DocumentUpload[]>([
+    { type: 'aadhar', file: null, status: 'pending', aadharNumber: '' },
+    { type: 'pan', file: null, status: 'pending' },
+    { type: '10th', file: null, status: 'pending' },
+    { type: '12th', file: null, status: 'pending' },
+    { type: 'income', file: null, status: 'pending' },
+    { type: 'caste', file: null, status: 'pending' },
+  ]);
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -74,6 +93,46 @@ const Profile = () => {
     setIsEditing(false);
   };
 
+  const handleFileChange = (type: DocumentUpload['type'], file: File) => {
+    setDocuments(prev => 
+      prev.map(doc => 
+        doc.type === type ? { ...doc, file, status: 'pending' } : doc
+      )
+    );
+  };
+
+  const handleAadharNumberChange = (value: string) => {
+    setDocuments(prev => 
+      prev.map(doc => 
+        doc.type === 'aadhar' ? { ...doc, aadharNumber: value } : doc
+      )
+    );
+  };
+
+  const handleUploadDocuments = async () => {
+    try {
+      const formData = new FormData();
+      documents.forEach(doc => {
+        if (doc.file) {
+          formData.append(doc.type, doc.file);
+        }
+      });
+
+      await axios.post('http://localhost:5000/api/users/uploadDocuments', formData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast.success('Documents uploaded successfully');
+      setShowDocumentModal(false);
+    } catch (error) {
+      console.error('Error uploading documents:', error);
+      toast.error('Failed to upload documents');
+    }
+  };
+
   return (
     <div className="p-6">
       {/* Profile Header */}
@@ -89,7 +148,7 @@ const Profile = () => {
               Edit Profile
             </button>
           </div>
-
+          
           {/* Profile Avatar */}
           <div className="absolute -bottom-16 left-8">
             <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center text-4xl font-bold text-primary shadow-lg">
@@ -124,7 +183,7 @@ const Profile = () => {
                   className="input input-bordered w-full h-10 bg-base-200"
                 />
               </div>
-
+              
               {/* Email */}
               <div>
                 <label className="text-sm font-medium text-base-content/70 mb-2 block">
@@ -264,88 +323,108 @@ const Profile = () => {
                 </select>
               </div>
 
-            </div>
-
-            {/* Bank Details Section */}
-            {/*<div className="mt-8">
-              <h3 className="text-lg font-semibold mb-6">Bank Details</h3>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                
-            <div>
-              <label className="text-sm font-medium text-base-content/70 mb-2 block">
-                Account Number
-              </label>
-              <div className="relative">
-                <CreditCard className="absolute left-3 top-2.5 h-5 w-5 text-base-content/50" />
-                <input
-                  type="text"
-                  disabled={!isEditing}
-                  value={profileData.bankDetails.accountNumber}
-                  onChange={(e) => setProfileData({
-                    ...profileData,
-                    bankDetails: { ...profileData.bankDetails, accountNumber: e.target.value }
-                  })}
-                  className="input input-bordered w-full h-10 bg-base-200 pl-10"
-                />
+              {/* Upload Documents Button */}
+              <div>
+                <label className="text-sm font-medium text-base-content/70 mb-2 block">
+                  Documents
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowDocumentModal(true)}
+                  className="btn btn-primary w-full h-10 gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload Documents
+                </button>
               </div>
             </div>
-
-            
-            <div>
-              <label className="text-sm font-medium text-base-content/70 mb-2 block">
-                IFSC Code
-              </label>
-              <input
-                type="text"
-                disabled={!isEditing}
-                value={profileData.bankDetails.ifsc}
-                onChange={(e) => setProfileData({
-                  ...profileData,
-                  bankDetails: { ...profileData.bankDetails, ifsc: e.target.value }
-                })}
-                className="input input-bordered w-full h-10 bg-base-200"
-              />
-            </div>
-
-            
-            <div>
-              <label className="text-sm font-medium text-base-content/70 mb-2 block">
-                Bank Name
-              </label>
-              <input
-                type="text"
-                disabled={!isEditing}
-                value={profileData.bankDetails.bankName}
-                onChange={(e) => setProfileData({
-                  ...profileData,
-                  bankDetails: { ...profileData.bankDetails, bankName: e.target.value }
-                })}
-                className="input input-bordered w-full h-10 bg-base-200"
-              />
-            </div>
-
-            
-            <div>
-              <label className="text-sm font-medium text-base-content/70 mb-2 block">
-                Branch
-              </label>
-              <input
-                type="text"
-                disabled={!isEditing}
-                value={profileData.bankDetails.branch}
-                onChange={(e) => setProfileData({
-                  ...profileData,
-                  bankDetails: { ...profileData.bankDetails, branch: e.target.value }
-                })}
-                className="input input-bordered w-full h-10 bg-base-200"
-              />
-            </div>
-        </div>
-      </div>*/}
           </form>
-        </div >
-      </div >
-    </div >
+        </div>
+      </div>
+
+      {/* Document Upload Modal */}
+      <ApplicationModal
+        isOpen={showDocumentModal}
+        onClose={() => setShowDocumentModal(false)}
+        title="Upload Documents"
+      >
+        <div className="p-4 space-y-4">
+          <p className="text-sm text-gray-600 mb-4">
+            Please upload the following documents in PDF or image format:
+          </p>
+
+          <div className="space-y-4">
+            {documents.map((doc) => (
+              <div key={doc.type} className="flex flex-col gap-2">
+                <label className="text-sm font-medium">
+                  {doc.type === '10th' ? '10th Marksheet' :
+                   doc.type === '12th' ? '12th Marksheet' :
+                   doc.type === 'aadhar' ? 'Aadhar Card' :
+                   doc.type === 'pan' ? 'PAN Card' :
+                   doc.type === 'income' ? 'Income Certificate' :
+                   'Caste Certificate'}
+                </label>
+                <div className="flex items-center gap-2">
+                  {doc.type === 'aadhar' && (
+                    <input
+                      type="text"
+                      placeholder="Enter Aadhar Number"
+                      value={doc.aadharNumber}
+                      onChange={(e) => handleAadharNumberChange(e.target.value)}
+                      className="input input-bordered input-sm w-64"
+                      maxLength={12}
+                    />
+                  )}
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileChange(doc.type, file);
+                      }}
+                      className="file-input file-input-bordered file-input-sm w-full"
+                    />
+                  </div>
+                  {doc.type === 'aadhar' && (
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      disabled={!doc.file || !doc.aadharNumber || doc.aadharNumber.length !== 12}
+                      onClick={() => {
+                        // Add verification logic here
+                        toast.success('Aadhar verification initiated');
+                      }}
+                    >
+                      Verify
+                    </button>
+                  )}
+                </div>
+                {doc.file && (
+                  <span className="text-sm text-success">File selected</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => setShowDocumentModal(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={handleUploadDocuments}
+            >
+              Upload All Documents
+            </button>
+          </div>
+        </div>
+      </ApplicationModal>
+    </div>
   );
 };
 
