@@ -20,6 +20,19 @@ interface Scholarship {
   };
 }
 
+interface ApplicationFormData {
+  fullName: string;
+  email: string;
+  phone: string;
+  qualification: string;
+  income: number;
+  caste: string;
+  documents: {
+    name: string;
+    isSelected: boolean;
+  }[];
+}
+
 const ScholarshipsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -33,6 +46,22 @@ const ScholarshipsPage = () => {
   });
   const { showToast } = useToast();
   const [savedScholarships, setSavedScholarships] = useState<number[]>([]);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [applicationData, setApplicationData] = useState<ApplicationFormData>({
+    fullName: '',
+    email: '',
+    phone: '',
+    qualification: '',
+    income: 0,
+    caste: '',
+    documents: [
+      { name: '10th Marksheet', isSelected: false },
+      { name: '12th Marksheet', isSelected: false },
+      { name: 'Income Certificate', isSelected: false },
+      { name: 'Caste Certificate', isSelected: false },
+      { name: 'Aadhar Card', isSelected: false }
+    ]
+  });
 
   const handleApply = (scholarship: Scholarship) => {
     setSelectedScholarship(scholarship);
@@ -47,6 +76,31 @@ const ScholarshipsPage = () => {
       setSavedScholarships(prev => [...prev, scholarshipId]);
       showToast('Scholarship saved successfully', 'success');
     }
+  };
+
+  const handleStartApplication = (scholarship: Scholarship) => {
+    // Initialize required documents based on scholarship
+    const requiredDocs = [
+      { name: '10th Marksheet', isSelected: false },
+      { name: '12th Marksheet', isSelected: false },
+      { name: 'Income Certificate', isSelected: false },
+      { name: 'Caste Certificate', isSelected: false },
+      { name: 'Aadhar Card', isSelected: false }
+    ];
+
+    setApplicationData(prev => ({
+      ...prev,
+      documents: requiredDocs
+    }));
+    setShowApplicationModal(true);
+  };
+
+  const handleSubmitApplication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would typically send the application data to your backend
+    console.log('Submitting application:', applicationData);
+    setShowApplicationModal(false);
+    showToast('Application submitted successfully!', 'success');
   };
 
   // Filter options
@@ -259,12 +313,181 @@ const ScholarshipsPage = () => {
             </button>
             <button 
               className="btn btn-primary"
-              onClick={() => setShowModal(false)}
+              onClick={() => handleStartApplication(selectedScholarship!)}
             >
               Start Application
             </button>
           </div>
         </div>
+      </ApplicationModal>
+
+      {/* Application Form Modal */}
+      <ApplicationModal
+        isOpen={showApplicationModal}
+        onClose={() => setShowApplicationModal(false)}
+        title="Scholarship Application"
+      >
+        <form onSubmit={handleSubmitApplication}>
+          {/* Personal Information */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Full Name</span>
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  value={applicationData.fullName}
+                  onChange={(e) => setApplicationData(prev => ({
+                    ...prev,
+                    fullName: e.target.value
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Email</span>
+                </label>
+                <input
+                  type="email"
+                  className="input input-bordered w-full"
+                  value={applicationData.email}
+                  onChange={(e) => setApplicationData(prev => ({
+                    ...prev,
+                    email: e.target.value
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Phone Number</span>
+                </label>
+                <input
+                  type="tel"
+                  className="input input-bordered w-full"
+                  value={applicationData.phone}
+                  onChange={(e) => setApplicationData(prev => ({
+                    ...prev,
+                    phone: e.target.value
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Highest Qualification</span>
+                </label>
+                <select
+                  className="select select-bordered w-full"
+                  value={applicationData.qualification}
+                  onChange={(e) => setApplicationData(prev => ({
+                    ...prev,
+                    qualification: e.target.value
+                  }))}
+                  required
+                >
+                  <option value="">Select Qualification</option>
+                  <option value="10th">10th</option>
+                  <option value="12th">12th</option>
+                  <option value="UG">Undergraduate</option>
+                  <option value="PG">Postgraduate</option>
+                </select>
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Annual Family Income</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full"
+                  value={applicationData.income}
+                  onChange={(e) => setApplicationData(prev => ({
+                    ...prev,
+                    income: Number(e.target.value)
+                  }))}
+                  required
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Category</span>
+                </label>
+                <select
+                  className="select select-bordered w-full"
+                  value={applicationData.caste}
+                  onChange={(e) => setApplicationData(prev => ({
+                    ...prev,
+                    caste: e.target.value
+                  }))}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="General">General</option>
+                  <option value="OBC">OBC</option>
+                  <option value="SC">SC</option>
+                  <option value="ST">ST</option>
+                  <option value="EWS">EWS</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Document Selection Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Required Documents</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {applicationData.documents.map((doc, index) => (
+                <div key={index} className="form-control">
+                  <label className="label cursor-pointer">
+                    <span className="label-text">{doc.name}</span>
+                    <input
+                      type="checkbox"
+                      className="checkbox checkbox-primary"
+                      checked={doc.isSelected}
+                      onChange={(e) => {
+                        const newDocs = [...applicationData.documents];
+                        newDocs[index] = {
+                          ...newDocs[index],
+                          isSelected: e.target.checked
+                        };
+                        setApplicationData(prev => ({
+                          ...prev,
+                          documents: newDocs
+                        }));
+                      }}
+                      required
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => setShowApplicationModal(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+            >
+              Submit Application
+            </button>
+          </div>
+        </form>
       </ApplicationModal>
     </div>
   );

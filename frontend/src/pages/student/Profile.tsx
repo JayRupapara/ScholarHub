@@ -75,7 +75,7 @@ const Profile = () => {
               Edit Profile
             </button>
           </div>
-
+          
           {/* Profile Avatar */}
           <div className="absolute -bottom-16 left-8">
             <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center text-4xl font-bold text-primary shadow-lg">
@@ -111,7 +111,7 @@ const Profile = () => {
                   className="input input-bordered w-full h-10 bg-base-200"
                 />
               </div>
-
+              
               {/* Email */}
               <div>
                 <label className="text-sm font-medium text-base-content/70 mb-2 block">

@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
+
+interface ScholarshipDeadline {
+  date: string;
+  title: string;
+  amount: number;
+  description: string;
+}
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  const deadlines = [
-    { date: '2024-03-15', title: 'STEM Excellence Scholarship', amount: 10000, type: 'Deadline' },
-    { date: '2024-03-20', title: 'Global Leaders Fund', amount: 15000, type: 'Interview' },
-    { date: '2024-03-25', title: 'Creative Arts Grant', amount: 7500, type: 'Document Due' },
+  // Sample scholarship deadlines data
+  const scholarshipDeadlines: ScholarshipDeadline[] = [
+    { 
+      date: '2024-03-15', 
+      title: 'STEM Excellence Scholarship', 
+      amount: 10000,
+      description: 'For outstanding students in STEM fields'
+    },
+    { 
+      date: '2024-03-20', 
+      title: 'Global Leaders Fund', 
+      amount: 15000,
+      description: 'Supporting future international leaders'
+    },
+    { 
+      date: '2024-03-25', 
+      title: 'Creative Arts Grant', 
+      amount: 7500,
+      description: 'For talented artists and performers'
+    },
   ];
 
   const getDaysInMonth = (date: Date) => {
@@ -31,12 +54,16 @@ const Calendar = () => {
 
   const hasDeadline = (day: number) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    return deadlines.some(deadline => new Date(deadline.date).toDateString() === date.toDateString());
+    return scholarshipDeadlines.some(deadline => 
+      new Date(deadline.date).toDateString() === date.toDateString()
+    );
   };
 
   const getDeadlinesForDay = (day: number) => {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    return deadlines.filter(deadline => new Date(deadline.date).toDateString() === date.toDateString());
+    return scholarshipDeadlines.filter(deadline => 
+      new Date(deadline.date).toDateString() === date.toDateString()
+    );
   };
 
   return (
@@ -79,30 +106,40 @@ const Calendar = () => {
                 {Array.from({ length: days }).map((_, index) => {
                   const day = index + 1;
                   const isToday = new Date().toDateString() === new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toDateString();
-                  const hasEvent = hasDeadline(day);
                   const deadlinesForDay = getDeadlinesForDay(day);
                   
                   return (
                     <div
                       key={day}
-                      className={`min-h-[100px] p-2 border-b border-r border-base-200 ${
+                      className={`min-h-[120px] p-2 border-b border-r border-base-200 ${
                         isToday ? 'bg-primary/5' : ''
-                      } hover:bg-neutral transition-colors`}
+                      }`}
                     >
-                      <span className={`inline-block w-6 h-6 text-center rounded-full ${
-                        isToday ? 'bg-primary text-neutral' : ''
-                      }`}>
-                        {day}
-                      </span>
-                      {hasEvent && (
-                        <div className="mt-1 space-y-1">
+                      <div className="flex justify-between items-start">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                          isToday ? 'bg-primary text-white' : ''
+                        }`}>
+                          {day}
+                        </span>
+                      </div>
+                      
+                      {deadlinesForDay.length > 0 && (
+                        <div className="mt-2">
                           {deadlinesForDay.map((deadline, idx) => (
                             <div
                               key={idx}
-                              className="text-xs p-1 rounded bg-primary/10 text-primary truncate"
-                              title={deadline.title}
+                              className="mb-1 p-1.5 rounded bg-error/10 hover:bg-error/20 transition-colors cursor-pointer"
                             >
-                              {deadline.title}
+                              <div className="text-xs font-medium text-error truncate">
+                                {deadline.title}
+                              </div>
+                              <div className="text-[10px] text-error/80 flex items-center gap-1 mt-0.5">
+                                <Clock className="h-3 w-3" />
+                                <span>Ends Today</span>
+                                <span className="ml-auto font-medium">
+                                  ₹{deadline.amount.toLocaleString()}
+                                </span>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -117,29 +154,30 @@ const Calendar = () => {
             <div className="mt-8">
               <h3 className="text-lg font-medium text-primary mb-4">Upcoming Deadlines</h3>
               <div className="space-y-4">
-                {deadlines.map((deadline, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-base-100 border border-base-200 rounded-lg hover:shadow-sm transition-shadow"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <CalendarIcon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-accent">{deadline.title}</p>
-                        <div className="flex items-center space-x-2 text-sm text-secondary">
-                          <span>{deadline.type}</span>
-                          <span>•</span>
-                          <span>Due: {new Date(deadline.date).toLocaleDateString()}</span>
+                {scholarshipDeadlines
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                  .map((deadline, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-base-100 border border-base-200 rounded-lg hover:shadow-sm transition-shadow"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="p-2 rounded-lg bg-error/10">
+                          <Clock className="h-5 w-5 text-error" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-accent">{deadline.title}</p>
+                          <p className="text-sm text-base-content/70">{deadline.description}</p>
+                          <div className="flex items-center space-x-2 text-sm text-error">
+                            <span>Deadline: {new Date(deadline.date).toLocaleDateString()}</span>
+                          </div>
                         </div>
                       </div>
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-success/10 text-success">
+                        ₹{deadline.amount.toLocaleString()}
+                      </span>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-success/10 text-success">
-                      ${deadline.amount.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </div>

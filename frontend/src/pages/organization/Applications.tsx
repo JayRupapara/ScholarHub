@@ -177,30 +177,14 @@ const Applications = () => {
 
   return (
     <div className="p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Scholarship Applications</h1>
-        <button 
-          className="btn btn-outline btn-primary gap-2"
-          onClick={handleExportData}
-        >
-          <Download className="h-4 w-4" />
-          Export Data
-        </button>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Scholarship Applications</h1>
       </div>
 
-      {/* Filters and Search */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search applications..."
-            className="input input-bordered w-full"
-          />
-          <Search className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
-        </div>
-
+      {/* Status Filter */}
+      <div className="flex gap-4 mb-6">
         <select 
-          className="select select-bordered w-full"
+          className="select select-bordered w-64"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
@@ -230,7 +214,7 @@ const Applications = () => {
                 <td>{application.studentName}</td>
                 <td>{application.scholarshipName}</td>
                 <td>{new Date(application.submittedDate).toLocaleDateString()}</td>
-                <td>${application.amount.toLocaleString()}</td>
+                <td>₹{application.amount.toLocaleString()}</td>
                 <td>
                   <div className="flex items-center gap-2">
                     {getStatusIcon(application.status)}
